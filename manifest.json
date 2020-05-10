@@ -2,7 +2,7 @@
 	"manifest_version": 2,
 	"name": "Show History Frequent Sites Button",
 	"description": "Configurable \"Show History\" button for the main toolbar. Uses the topSites API to get frecent sites with minimal permissions.",
-	"version": "0.5",
+	"version": "0.6",
 	"applications":{
 		"gecko": {
 			"id": "frequent-sites-button@jeffersonscher.com",

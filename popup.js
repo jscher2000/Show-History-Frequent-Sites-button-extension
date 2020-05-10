@@ -1,6 +1,7 @@
 /* 
-  Copyright 2020. Jefferson "jscher2000" Scher. License: MPL-2.0.
+  "Show History Frequent Sites Button" Copyright 2020. Jefferson "jscher2000" Scher. License: MPL-2.0.
   version 0.5 - initial concept
+  version 0.6 - enabled middle-click; dark theme option; option to show more sites by limiting URLs per site to one
 */
 
 /*** Lay out the list (later: get stored preferences first) ***/
@@ -10,10 +11,12 @@ var oPrefs = {
 	opennewtab: false,			// direct site to a new tab by default
 	newtabactive: true,			// make the new tab active
 	newwinprivate: false,		// whether new windows are private by default
-	listmax: 20,				// max sites to show on list
+	listmax: 15,				// max sites to show on list
 	showBlocked: false,			// include sites blocked on the new tab page?
 	showPinned: false,			// include sites pinned on the new tab page?
-	searchShortcuts: false		// include search shortcuts from the new tab page?
+	searchShortcuts: false,		// include search shortcuts from the new tab page?
+	oneperdomain: false,		// only show one URL for each domain
+	darktheme: false			// light text/dark background
 }
 
 // Update oPrefs from storage
@@ -26,9 +29,11 @@ browser.storage.local.get("prefs").then((results) => {
 			}
 		}
 	}
+	// Set dark theme
+	if (oPrefs.darktheme) document.body.className = 'dark';
 	var gettingTopSites = browser.topSites.get({
-		newtab: false,
-		onePerDomain: false,
+		newtab: false, /* do not use "Top Sites" from Firefox new tab */
+		onePerDomain: oPrefs.oneperdomain,
 		includeFavicon: true,
 		limit: parseInt(oPrefs.listmax),
 		includeBlocked: oPrefs.showBlocked,
@@ -96,7 +101,8 @@ function openFrecent(evt){
 		}).catch((err) => {
 			document.getElementById('oops').textContent = 'Error opening new window: ' + err.message;
 		});
-	} else if ((oPrefs.opennewtab === true && !CtrlCommand) || (oPrefs.opennewtab === false && CtrlCommand)){ // Open new tab
+	} else if ((oPrefs.opennewtab === true && !CtrlCommand && evt.button != 1) || 
+				(oPrefs.opennewtab === false && (CtrlCommand || evt.button == 1))){ // Open new tab
 		browser.tabs.create({
 			active: oPrefs.newtabactive,
 			url: siteUrl
@@ -118,7 +124,19 @@ function openFrecent(evt){
 
 // Attach event handlers 
 document.getElementById('frecentlist').addEventListener('click', openFrecent, false);
-document.getElementById('options').addEventListener('click', function(){
+document.getElementById('frecentlist').addEventListener('mousedown', function(evt){
+	if (evt.button == 1){
+		// Cancel autoscrolling for middle-click
+		evt.preventDefault();
+	}
+}, false);
+document.getElementById('frecentlist').addEventListener('mouseup', function(evt){
+	if (evt.button == 1){
+		// Open site
+		openFrecent(evt);
+	}
+}, false);
+document.getElementById('options').addEventListener('click', function(evt){
 	browser.runtime.openOptionsPage();
 	self.close();
 }, false);

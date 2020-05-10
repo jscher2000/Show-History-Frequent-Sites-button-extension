@@ -10,13 +10,21 @@ h1 {font-size: 1.2em;}
 </head>
 <body>
 <form>
-<h1>Adjust List Options &mdash; and don't forget to: <button id="btnsave" type="button">Save Changes</button></h1>
-<p>Maximum number of sites to list: <input type="number" name="numsites" step="1" value="15" min="1" max="100" style="width: 45px; transform: scale(1.5) translateY(-2px); margin-left: 30px; padding-top: 0; padding-bottom: 0;"></p>
-<p class="chk">Same tab vs. New tab:<br>
-	<label><input type="checkbox" name="opennewtab" value="opennewtab">Open in a new tab by default (otherwise, use Ctrl+click (on Mac, Command+click) to open the site in a new tab)</label><br>
-	<label><input type="checkbox" name="newtabactive" value="newtabactive" checked>Switch to new tab immediately (otherwise, open in the background)</label></p>
-<p class="chk">When using Shift+click to launch site in a new window:<br>
-	<label><input type="checkbox" name="newwinprivate" value="newwinprivate">Make the window private by default (otherwise, use Shift+Alt+click for a private window)</label></p>
+<h1>Adjust List Options &mdash; and don't forget to <button id="btnsave" type="button">Save Changes</button></h1>
+<p class="chk"><strong>List drop-down options</strong>:<br>
+	<label for="numsites">Maximum number of URLs to list:</label> <input type="number" name="numsites" id="numsites" step="1" value="15" min="1" max="100" style="width: 45px; transform: scale(1.5) translateY(-2px); margin-left: 20px; padding-top: 0; padding-bottom: 0;"><br>
+	<label><input type="checkbox" name="darktheme" value="darktheme">Use a dark theme (light text on dark background)</label>
+</p>
+<p class="chk"><strong>Open in new tab options</strong>:<br>
+	<label><input type="checkbox" name="opennewtab" value="opennewtab">Open in a new tab by default (otherwise, use Ctrl+click (on Mac, Command+click) or middle-click to open URL in a new tab)</label><br>
+	<label><input type="checkbox" name="newtabactive" value="newtabactive" checked>Switch to new tab immediately (otherwise, open in the background)</label>
+</p>
+<p class="chk"><strong>Open in new window options</strong> (use Shift+click to open URL in a new window):<br>
+	<label><input type="checkbox" name="newwinprivate" value="newwinprivate">Make the window private by default (otherwise, use Shift+Alt+click for a private window)</label>
+</p>
+<p class="chk"><strong>Miscellaneous options</strong>:<br>
+	<label><input type="checkbox" name="oneperdomain" value="oneperdomain">Limit URLs to one per site to show more different sites</label>
+</p>
 <p id="oops"></p>
 </form>
 <script src="options.js"></script>

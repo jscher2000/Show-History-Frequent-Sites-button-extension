@@ -1,6 +1,7 @@
 /* 
-  Copyright 2020. Jefferson "jscher2000" Scher. License: MPL-2.0.
+  "Show History Frequent Sites Button" Copyright 2020. Jefferson "jscher2000" Scher. License: MPL-2.0.
   version 0.5 - initial concept
+  version 0.6 - enabled middle-click; dark theme option; option to show more sites by limiting URLs per site to one
 */
 
 /*** Initialize Page ***/
@@ -13,7 +14,9 @@ var oPrefs = {
 	listmax: 15,				// max sites to show on list
 	showBlocked: false,			// include sites blocked on the new tab page?
 	showPinned: false,			// include sites pinned on the new tab page?
-	searchShortcuts: false		// include search shortcuts from the new tab page?
+	searchShortcuts: false,		// include search shortcuts from the new tab page?
+	oneperdomain: false,		// only show one URL for each domain
+	darktheme: false			// light text/dark background
 }
 
 // Update oPrefs from storage and update form values
