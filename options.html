@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Options for Show History Frequent Sites Button</title>
+<style>
+body {font-size: 16px;}
+h1 {font-size: 1.2em;}
+</style>
+</head>
+<body>
+<form>
+<h1>Adjust List Options &mdash; and don't forget to: <button id="btnsave" type="button">Save Changes</button></h1>
+<p>Maximum number of sites to list: <input type="number" name="numsites" step="1" value="15" min="1" max="100" style="width: 45px; transform: scale(1.5) translateY(-2px); margin-left: 30px; padding-top: 0; padding-bottom: 0;"></p>
+<p class="chk">Same tab vs. New tab:<br>
+	<label><input type="checkbox" name="opennewtab" value="opennewtab">Open in a new tab by default (otherwise, use Ctrl+click (on Mac, Command+click) to open the site in a new tab)</label><br>
+	<label><input type="checkbox" name="newtabactive" value="newtabactive" checked>Switch to new tab immediately (otherwise, open in the background)</label></p>
+<p class="chk">When using Shift+click to launch site in a new window:<br>
+	<label><input type="checkbox" name="newwinprivate" value="newwinprivate">Make the window private by default (otherwise, use Shift+Alt+click for a private window)</label></p>
+<p id="oops"></p>
+</form>
+<script src="options.js"></script>
+</body>
+</html>

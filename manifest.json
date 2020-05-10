@@ -1,0 +1,37 @@
+{
+	"manifest_version": 2,
+	"name": "Show History Frequent Sites Button",
+	"description": "Configurable \"Show History\" button for the main toolbar. Uses the topSites API to get frecent sites with minimal permissions.",
+	"version": "0.5",
+	"applications":{
+		"gecko": {
+			"id": "frequent-sites-button@jeffersonscher.com",
+			"strict_min_version": "63.0"
+		}
+	},
+	"developer": {
+		"name": "Jefferson \"jscher2000\" Scher",
+		"url": "https://github.com/jscher2000/"
+	},
+	"browser_action": {
+		"browser_style": true,
+		"default_title": "Show History",
+		"default_popup": "popup.html",
+		"theme_icons": [{
+			"light": "icons/show-history-128-dark.png",
+			"dark": "icons/show-history-128.png",
+			"size": 128
+		}]
+	},
+	"permissions": [
+		"topSites",
+		"storage"
+	],
+	"icons": {
+		"128": "icons/show-history-128.png"
+	},
+	"options_ui": {
+		"page": "options.html",
+		"browser_style": true
+	}
+}
