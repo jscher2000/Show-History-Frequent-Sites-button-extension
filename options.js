@@ -3,6 +3,7 @@
   version 0.5 - initial concept
   version 0.6 - enabled middle-click; dark theme option; option to show more sites by limiting URLs per site to one
   version 0.7 - New Tab Page Top Sites option, group-by-host option
+  version 0.7.1 - Restyle error messages in popup
 */
 
 /*** Initialize Page ***/

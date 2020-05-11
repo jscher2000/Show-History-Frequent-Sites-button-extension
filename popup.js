@@ -3,6 +3,7 @@
   version 0.5 - initial concept
   version 0.6 - enabled middle-click; dark theme option; option to show more sites by limiting URLs per site to one
   version 0.7 - New Tab Page Top Sites option, group-by-host option
+  version 0.7.1 - Restyle error messages in popup
 */
 
 /*** Lay out the list (later: get stored preferences first) ***/
@@ -109,7 +110,8 @@ browser.storage.local.get("prefs").then((results) => {
 		}
 	});
 }).catch((err) => {
-	document.getElementById('oops').textContent = 'Error retrieving "prefs" from storage or building list: ' + err.message;
+	document.querySelector('#oops span').textContent = 'Error retrieving "prefs" from storage or building list: ' + err.message;
+	document.getElementById('oops').style.display = 'block';
 });
 
 function fixPath(site){
@@ -175,7 +177,8 @@ function openFrecent(evt){
 		if (tgt.nodeName != "LI"){
 			tgt = tgt.closest('li');
 			if (!tgt){
-				document.getElementById('oops').textContent = 'Script is confused about what you clicked. Try again?';
+				document.querySelector('#oops span').textContent = 'Script is confused about what you clicked. Try again?';
+				document.getElementById('oops').style.display = 'block';
 				return;
 			}
 		}
@@ -190,7 +193,8 @@ function openFrecent(evt){
 				incognito: priv,
 				url: siteUrl
 			}).catch((err) => {
-				document.getElementById('oops').textContent = 'Error opening new window: ' + err.message;
+				document.querySelector('#oops span').textContent = 'Error opening new window: ' + err.message;
+				document.getElementById('oops').style.display = 'block';
 			});
 		} else if ((oPrefs.opennewtab === true && !CtrlCommand && evt.button != 1) || 
 					(oPrefs.opennewtab === false && (CtrlCommand || evt.button == 1))){ // Open new tab
@@ -200,7 +204,8 @@ function openFrecent(evt){
 			}).then(() => {
 				if (oPrefs.newtabactive == true) self.close(); // Close the popup if we changed tabs
 			}).catch((err) => {
-				document.getElementById('oops').textContent = 'Error opening new tab: ' + err.message;
+				document.querySelector('#oops span').textContent = 'Error opening new tab: ' + err.message;
+				document.getElementById('oops').style.display = 'block';
 			});
 		} else { // Navigate current tab
 			browser.tabs.update({
@@ -208,7 +213,8 @@ function openFrecent(evt){
 			}).then(() => {
 				self.close(); // Close the popup
 			}).catch((err) => {
-				document.getElementById('oops').textContent = 'Error navigating this tab: ' + err.message;
+				document.querySelector('#oops span').textContent = 'Error opening that URL: ' + err.message;
+				document.getElementById('oops').style.display = 'block';
 			});
 		}
 	}
@@ -231,4 +237,7 @@ document.getElementById('frecentlist').addEventListener('mouseup', function(evt)
 document.getElementById('options').addEventListener('click', function(evt){
 	browser.runtime.openOptionsPage();
 	self.close();
+}, false);
+document.getElementById('btnclose').addEventListener('click', function(evt){
+	evt.target.parentNode.style.display = 'none';
 }, false);
