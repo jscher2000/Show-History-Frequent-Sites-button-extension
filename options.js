@@ -2,6 +2,7 @@
   "Show History Frequent Sites Button" Copyright 2020. Jefferson "jscher2000" Scher. License: MPL-2.0.
   version 0.5 - initial concept
   version 0.6 - enabled middle-click; dark theme option; option to show more sites by limiting URLs per site to one
+  version 0.7 - New Tab Page Top Sites option, group-by-host option
 */
 
 /*** Initialize Page ***/
@@ -16,7 +17,9 @@ var oPrefs = {
 	showPinned: false,			// include sites pinned on the new tab page?
 	searchShortcuts: false,		// include search shortcuts from the new tab page?
 	oneperdomain: false,		// only show one URL for each domain
-	darktheme: false			// light text/dark background
+	darktheme: false,			// light text/dark background
+	newtabpage: false,			// switch from frecent sites to new tab page Top Sites
+	groupbyhost: false			// group list by hostname
 }
 
 // Update oPrefs from storage and update form values

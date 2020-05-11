@@ -1,4 +1,4 @@
-/* Show History Frequent Sites Button 0.6 */
+/* Show History Frequent Sites Button 0.7 */
 body {
 	color: #000;
 	background-color: #fff;
@@ -42,6 +42,7 @@ li {
 	padding: 4px 0;
 	cursor: pointer;
 	border-top: 1px solid #eee;
+	position: relative;
 }
 li:first-of-type {
 	border: none;
@@ -61,13 +62,61 @@ li > img {
 }
 li > span {
 	display: inline-block;
-	max-width: 45%;
+}
+li > span:nth-of-type(1), li > span:nth-of-type(2) {
+	max-width: calc(50% - 20px);
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
 }
-li > span:nth-of-type(3){
+li > span:nth-of-type(2)::before {
+	content: "— ";
+	color: #000;
+}
+body.dark li > span:nth-of-type(2)::before {
+	color: #f8f8f8;
+}
+li > span:nth-of-type(2){
 	color: rgb(66, 143, 219);
+}
+li > span:nth-of-type(3){
+	position: absolute;
+	right: 0;
+	z-index: 100;
+	width: 21px;
+	border: 1px solid transparent;
+	border-radius: 4px;
+}
+li > span.closed::before {
+	content: "▼";
+	padding-left: 3px;
+}
+body.dark li > span.closed::before {
+	content: "▽";
+}
+li > span.open::before {
+	content: "▲";
+	padding-left: 3px;
+}
+body.dark li > span.open::before {
+	content: "△";
+}
+li > span.closed:hover, li > span.open:hover {
+	border-color: #000;
+}
+body.dark li > span.closed:hover, body.dark li > span.open:hover {
+	border-color: #f8f8f8;
+}
+li > span.additional::before {
+	content: "—";
+	padding-left: 3px;
+	color: #000;
+}
+body.dark li > span.additional::before {
+	color: #f8f8f8;
+}
+li[hostclosed="true"] {
+	display: none;
 }
 #oops {
 	color: red;

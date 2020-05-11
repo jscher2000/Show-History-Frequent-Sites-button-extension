@@ -2,6 +2,7 @@
   "Show History Frequent Sites Button" Copyright 2020. Jefferson "jscher2000" Scher. License: MPL-2.0.
   version 0.5 - initial concept
   version 0.6 - enabled middle-click; dark theme option; option to show more sites by limiting URLs per site to one
+  version 0.7 - New Tab Page Top Sites option, group-by-host option
 */
 
 /*** Lay out the list (later: get stored preferences first) ***/
@@ -16,7 +17,9 @@ var oPrefs = {
 	showPinned: false,			// include sites pinned on the new tab page?
 	searchShortcuts: false,		// include search shortcuts from the new tab page?
 	oneperdomain: false,		// only show one URL for each domain
-	darktheme: false			// light text/dark background
+	darktheme: false,			// light text/dark background
+	newtabpage: false,			// switch from frecent sites to new tab page Top Sites
+	groupbyhost: false			// group list by hostname
 }
 
 // Update oPrefs from storage
@@ -31,8 +34,11 @@ browser.storage.local.get("prefs").then((results) => {
 	}
 	// Set dark theme
 	if (oPrefs.darktheme) document.body.className = 'dark';
+	// Update title for New Tab Page Top Sites
+	if (oPrefs.newtabpage) document.querySelector('h1 > span').textContent = 'Top Sites from the New Tab Page';
+	// Build URLs list
 	var gettingTopSites = browser.topSites.get({
-		newtab: false, /* do not use "Top Sites" from Firefox new tab */
+		newtab: oPrefs.newtabpage,
 		onePerDomain: oPrefs.oneperdomain,
 		includeFavicon: true,
 		limit: parseInt(oPrefs.listmax),
@@ -43,18 +49,63 @@ browser.storage.local.get("prefs").then((results) => {
 	gettingTopSites.then((arrSites) => {
 		var list = document.getElementById('frecentlist');
 		var newLI = document.getElementById('newLI');
-		for (var i=0; i<arrSites.length; i++){
-			var clone = document.importNode(newLI.content, true);
-			// Populate the template
-			var elTemp = clone.querySelector('li');
-			elTemp.setAttribute('title', arrSites[i].title + ' - ' + arrSites[i].url);
-			elTemp = clone.querySelector('img');
-			elTemp.setAttribute('src', fixPath(arrSites[i]));
-			elTemp = clone.querySelectorAll('span');
-			elTemp[0].appendChild(document.createTextNode(arrSites[i].title));
-			elTemp[2].appendChild(document.createTextNode(arrSites[i].url));
-			// Add the item to the list
-			list.appendChild(clone);
+		if (oPrefs.groupbyhost){
+			// read the list into a new object for grouping { hostname: x, listindex: [] }
+			var hostgroups = [], currhost, savedhost, i, j;
+			for (i=0; i<arrSites.length; i++){
+				currhost = new URL(arrSites[i].url).hostname;
+				savedhost = hostgroups.findIndex( objhostgroup => objhostgroup.hostname === currhost );
+				if (savedhost > -1){ // add URL to index
+					hostgroups[savedhost].listindex.push(i);
+				} else { // new host
+					hostgroups.push({
+						hostname: currhost,
+						listindex: [i]
+					});
+				}
+			}
+			console.log(hostgroups);
+			for (i=0; i<hostgroups.length; i++){
+				for (j=0; j<hostgroups[i].listindex.length; j++){
+					var clone = document.importNode(newLI.content, true);
+					// Populate the template
+					var elTemp = clone.querySelector('li');
+					elTemp.setAttribute('title', arrSites[hostgroups[i].listindex[j]].title + ' - ' + arrSites[hostgroups[i].listindex[j]].url);
+					elTemp = clone.querySelector('img');
+					elTemp.setAttribute('src', fixPath(arrSites[hostgroups[i].listindex[j]]));
+					elTemp = clone.querySelectorAll('span');
+					elTemp[0].appendChild(document.createTextNode(arrSites[hostgroups[i].listindex[j]].title));
+					elTemp[1].appendChild(document.createTextNode(arrSites[hostgroups[i].listindex[j]].url));
+					if (hostgroups[i].listindex.length > 1 && j == 0){ // first of group
+						elTemp[2].className = 'closed';
+						elTemp[2].setAttribute('title', hostgroups[i].hostname + ' group');
+						clone.querySelector('li').setAttribute('hostname', hostgroups[i].hostname);
+						clone.querySelector('li').setAttribute('hostclosed', false);
+						clone.querySelector('img').setAttribute('src', fixPath(arrSites[hostgroups[i].listindex[j]]));
+					} else if (j > 0){ // additional in group
+						elTemp[2].className = 'additional';
+						clone.querySelector('li').setAttribute('hostname', hostgroups[i].hostname);
+						clone.querySelector('li').setAttribute('hostclosed', true);
+						clone.querySelector('img').setAttribute('src', fixPath(''));
+					}
+					// Add the item to the list
+					list.appendChild(clone);
+				}
+			}
+		} else {
+			for (var i=0; i<arrSites.length; i++){
+				var clone = document.importNode(newLI.content, true);
+				// Populate the template
+				var elTemp = clone.querySelector('li');
+				elTemp.setAttribute('title', arrSites[i].title + ' - ' + arrSites[i].url);
+				elTemp = clone.querySelector('img');
+				elTemp.setAttribute('src', fixPath(arrSites[i]));
+				elTemp = clone.querySelectorAll('span');
+				elTemp[0].appendChild(document.createTextNode(arrSites[i].title));
+				elTemp[1].appendChild(document.createTextNode(arrSites[i].url));
+				// Add the item to the list
+				list.appendChild(clone);
+			}
 		}
 	});
 }).catch((err) => {
@@ -62,7 +113,10 @@ browser.storage.local.get("prefs").then((results) => {
 });
 
 function fixPath(site){
-	if (site.favicon){
+	if (!site || site.length == 0){
+		if (oPrefs.darktheme) return 'icons/group-add-dark.png';
+		else return 'icons/group-add.png';
+	} else if (site.favicon){
 		return site.favicon;
 	} else {
 		if (site.url.indexOf('http://') == 0 || site.url.indexOf('https://') == 0){
@@ -78,47 +132,85 @@ function fixPath(site){
 /*** Handle User Interaction ***/
 
 function openFrecent(evt){
-	console.log(evt);
-	// Get the li the user clicked
 	var tgt = evt.target;
-	if (tgt.nodeName != "LI"){
-		tgt = tgt.closest('li');
-		if (!tgt){
-			document.getElementById('oops').textContent = 'Script is confused about what you clicked. Try again?';
-			return;
+	// Is this a group control?
+	if (['open', 'closed', 'additional'].includes(tgt.className)){
+		// Handle opening/closing group
+		var li = tgt.closest('li');
+		var hn = li.getAttribute('hostname');
+		switch (tgt.className){
+			case 'open': 
+				// close up the additional items
+				while (li.nextElementSibling){
+					li = li.nextElementSibling;
+					if (li.getAttribute('hostname') == hn){
+						li.setAttribute('hostclosed', true);
+					} else {
+						break;
+					}
+				}
+				// switch the icon class
+				tgt.className = 'closed';
+				break;
+			case 'closed':
+				// open up the additional items
+				while (li.nextElementSibling){
+					li = li.nextElementSibling;
+					if (li.getAttribute('hostname') == hn){
+						li.setAttribute('hostclosed', false);
+					} else {
+						break;
+					}
+				}
+				// switch the icon class
+				tgt.className = 'open';
+				break;
+			default:
+				// WTF
 		}
-	}
-	// Get the URL from the second span in the li
-	var siteUrl = tgt.querySelectorAll('span')[2].textContent;
-	// Where to open
-	var CtrlCommand = (browser.runtime.PlatformOs == 'mac') ? evt.metaKey : evt.ctrlKey;
-	if (evt.shiftKey){ // Open new window
-		var priv = false;
-		if (oPrefs.newwinprivate == true || (evt.altKey && oPrefs.newwinprivate == false)) priv = true;
-		browser.windows.create({
-			incognito: priv,
-			url: siteUrl
-		}).catch((err) => {
-			document.getElementById('oops').textContent = 'Error opening new window: ' + err.message;
-		});
-	} else if ((oPrefs.opennewtab === true && !CtrlCommand && evt.button != 1) || 
-				(oPrefs.opennewtab === false && (CtrlCommand || evt.button == 1))){ // Open new tab
-		browser.tabs.create({
-			active: oPrefs.newtabactive,
-			url: siteUrl
-		}).then(() => {
-			if (oPrefs.newtabactive == true) self.close(); // Close the popup if we changed tabs
-		}).catch((err) => {
-			document.getElementById('oops').textContent = 'Error opening new tab: ' + err.message;
-		});
-	} else { // Navigate current tab
-		browser.tabs.update({
-			url: siteUrl
-		}).then(() => {
-			self.close(); // Close the popup
-		}).catch((err) => {
-			document.getElementById('oops').textContent = 'Error navigating this tab: ' + err.message;
-		});
+	} else if (['additional'].includes(tgt.className)){
+		// do nothing, ignore, peace out
+	} else {
+		// Get the li the user clicked
+		if (tgt.nodeName != "LI"){
+			tgt = tgt.closest('li');
+			if (!tgt){
+				document.getElementById('oops').textContent = 'Script is confused about what you clicked. Try again?';
+				return;
+			}
+		}
+		// Get the URL from the second span in the li
+		var siteUrl = tgt.querySelectorAll('span')[1].textContent;
+		// Where to open
+		var CtrlCommand = (browser.runtime.PlatformOs == 'mac') ? evt.metaKey : evt.ctrlKey;
+		if (evt.shiftKey){ // Open new window
+			var priv = false;
+			if (oPrefs.newwinprivate == true || (evt.altKey && oPrefs.newwinprivate == false)) priv = true;
+			browser.windows.create({
+				incognito: priv,
+				url: siteUrl
+			}).catch((err) => {
+				document.getElementById('oops').textContent = 'Error opening new window: ' + err.message;
+			});
+		} else if ((oPrefs.opennewtab === true && !CtrlCommand && evt.button != 1) || 
+					(oPrefs.opennewtab === false && (CtrlCommand || evt.button == 1))){ // Open new tab
+			browser.tabs.create({
+				active: oPrefs.newtabactive,
+				url: siteUrl
+			}).then(() => {
+				if (oPrefs.newtabactive == true) self.close(); // Close the popup if we changed tabs
+			}).catch((err) => {
+				document.getElementById('oops').textContent = 'Error opening new tab: ' + err.message;
+			});
+		} else { // Navigate current tab
+			browser.tabs.update({
+				url: siteUrl
+			}).then(() => {
+				self.close(); // Close the popup
+			}).catch((err) => {
+				document.getElementById('oops').textContent = 'Error navigating this tab: ' + err.message;
+			});
+		}
 	}
 }
 
