@@ -5,6 +5,7 @@
   version 0.7 - New Tab Page Top Sites option, group-by-host option
   version 0.7.1 - Restyle error messages in popup
   version 0.8 - Filter bar to find sites in long lists, highlight unsaved changed options
+  version 0.8.1 - Fix icon bug applying filter to grouped list
 */
 
 /*** Initialize Page ***/

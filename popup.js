@@ -5,6 +5,7 @@
   version 0.7 - New Tab Page Top Sites option, group-by-host option
   version 0.7.1 - Restyle error messages in popup
   version 0.8 - Filter bar to find sites in long lists, highlight unsaved changed options
+  version 0.8.1 - Fix icon bug applying filter to grouped list
 */
 
 /*** Lay out the list (later: get stored preferences first) ***/
@@ -276,21 +277,24 @@ function filterUrls(evt){
 			}
 		}
 		// Check groups
-		listels = document.querySelectorAll('#frecentlist li[hostname][filterfail="true"]:not([hostbutton="additional"]');
+		listels = document.querySelectorAll('#frecentlist li[hostname]:not([hostbutton="additional"]');
 		for (i=0; i<listels.length; i++){
-			var el = listels[i], hn = el.getAttribute('hostname'), groupfail = true, addfail = true;
+			var el = listels[i], hn = el.getAttribute('hostname'), addshow = 0;
 			while (el.nextElementSibling){
 				el = el.nextElementSibling;
 				// Different host, we're done looping
 				if (el.getAttribute('hostname') != hn) break;
 				if (!el.hasAttribute('filterfail')){
-					groupfail = false;
-					if (el.getAttribute('hostbutton') == 'additional') addfail = false;
-					break;
+					if (el.getAttribute('hostbutton') == 'additional') addshow++;
 				}
 			}
-			if (groupfail) listels[i].setAttribute('filterfail', 'all');
-			else if (addfail) listels[i].setAttribute('filterfail', 'adds');
+			if (addshow == 0){
+				if (listels[i].hasAttribute('filterfail')){
+					if (listels[i].getAttribute('filterfail') == 'true') listels[i].setAttribute('filterfail', 'all');
+				} else {
+					listels[i].setAttribute('filterfail', 'adds');
+				}
+			}
 		}
 	}
 	// Update lastfilter
