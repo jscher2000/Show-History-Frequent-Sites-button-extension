@@ -7,14 +7,14 @@
 </head>
 <body>
 <header>
-	<h1 id="dialogtitle"><span>Frequent Site URLs</span><button id="options" type="button" title="Open Options page">⚙️</button></h1>
+	<h1 id="dialogtitle"><span>Frequent Site URLs</span><span id="alignright"><input type="text" id="filterbar" placeholder="Filter list" value=""><button id="filterclear" type="button" title="Clear filter">❌</button><button id="options" type="button" title="Open Options page">⚙️</button></span></h1>
 </header>
 <main>
-<ul id="frecentlist">
+<ul id="frecentlist" class="popup">
 </ul>
 <p id="oops"><span></span><button id="btnclose" type="button" title="Close">X</button></p>
 </main>
 </body>
 <script type="text/javascript" src="popup.js"></script>
-<template id="newLI"><li id="" class=""><img style="width:16px;height:16px" src="iconsrc"> <span></span> <span></span><span class="expander"></span></li></template>
+<template id="newLI"><li><img style="width:16px;height:16px" src="iconsrc"> <span></span> <span><a href=""></a></span><span class="expander"></span></li></template>
 </html>

@@ -2,7 +2,7 @@
 	"manifest_version": 2,
 	"name": "Show History Frequent Sites Button",
 	"description": "Add a \"Show History\" button to your toolbar. Uses the topSites API to get frecent sites with minimal permissions. Configure the number of sites, open in the background, open in a private window, and more.",
-	"version": "0.7.1",
+	"version": "0.8",
 	"applications":{
 		"gecko": {
 			"id": "frequent-sites-button@jeffersonscher.com",

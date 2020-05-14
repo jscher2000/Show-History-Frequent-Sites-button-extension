@@ -1,11 +1,13 @@
-/* Show History Frequent Sites Button 0.7 */
+/* Show History Frequent Sites Button 0.8 */
 body {
 	color: #000;
 	background-color: #fff;
 	margin: 0;
-	padding: 0 16px;
-	min-width: 400px;
+	padding: 0 8px 0 16px;
+	min-width: 700px;
+	min-height: 350px;
 	font-size: 14px;
+	overflow-y: scroll;
 }
 body.dark {
 	color: #f8f8f8;
@@ -15,9 +17,35 @@ h1 {
 	font-size: 1.25em;
 	position: relative;
 }
-#options {
+#alignright {
 	position: absolute;
 	right: 0;
+}
+#filterbar {
+	width: 11em;
+	margin-right: 4px;
+	border-radius: 4px;
+	padding-left: 4px;
+}
+body.dark #filterbar {
+	color: #f8f8f8;
+	background-color: #333;
+}
+#filterclear {
+	-moz-appearance: none;
+	padding: 1px 1px 3px !important;
+	border-radius: 20px;
+	background-color: transparent !important;
+	border: none !important;
+	margin-left: -26px !important;
+}
+#filterclear:hover {
+	background-color: #ddd !important;
+}
+#filterbar:placeholder-shown + #filterclear {
+	display: none;
+}
+#options {
 	font-size: 1.1em;
 	-moz-appearance: none;
 	padding: 1px 2px 3px 2px !important;
@@ -40,9 +68,11 @@ li {
 	display: inline-block;
 	width: 100%;
 	padding: 4px 0;
-	cursor: pointer;
 	border-top: 1px solid #eee;
 	position: relative;
+}
+ul.popup > li {
+	cursor: pointer;
 }
 li:first-of-type {
 	border: none;
@@ -76,9 +106,14 @@ li > span:nth-of-type(2)::before {
 body.dark li > span:nth-of-type(2)::before {
 	color: #f8f8f8;
 }
-li > span:nth-of-type(2){
+li > span:nth-of-type(2), {
 	color: rgb(66, 143, 219);
 }
+li > span:nth-of-type(2) > a {
+	text-decoration: none;
+	color: rgb(66, 143, 219);
+}
+/* Rules for group controls */
 li > span:nth-of-type(3){
 	position: absolute;
 	right: 0;
@@ -87,35 +122,47 @@ li > span:nth-of-type(3){
 	border: 1px solid transparent;
 	border-radius: 4px;
 }
-li > span.closed::before {
+li[hostbutton="closed"] > .expander::before {
 	content: "▼";
 	padding-left: 3px;
 }
-body.dark li > span.closed::before {
+body.dark li[hostbutton="closed"] > .expander::before {
 	content: "▽";
 }
-li > span.open::before {
+li[hostbutton="open"] > .expander::before {
 	content: "▲";
 	padding-left: 3px;
 }
-body.dark li > span.open::before {
+body.dark li[hostbutton="open"] > .expander::before {
 	content: "△";
 }
-li > span.closed:hover, li > span.open:hover {
+li[hostbutton="closed"] > .expander:hover, li[hostbutton="open"] > .expander:hover {
 	border-color: #000;
 }
-body.dark li > span.closed:hover, body.dark li > span.open:hover {
+body.dark li[hostbutton="closed"] > .expander:hover, body.dark li[hostbutton="open"] > .expander:hover {
 	border-color: #f8f8f8;
 }
-li > span.additional::before {
+li[hostbutton="additional"] > .expander::before {
 	content: "—";
 	padding-left: 3px;
 	color: #000;
 }
-body.dark li > span.additional::before {
+body.dark li[hostbutton="additional"] > .expander::before {
 	color: #f8f8f8;
 }
 li[hostclosed="true"] {
+	display: none;
+}
+/* Rules for filtering */
+li[filterfail="true"]:not([hostbutton="open"]):not([hostbutton="closed"]),
+li[filterfail="all"] {
+	display: none;
+}
+li[filterfail="true"][hostbutton="open"] > span:not(:nth-of-type(3)), 
+li[filterfail="true"][hostbutton="closed"] > span:not(:nth-of-type(3)) {
+	opacity: 0.4;
+}
+li[filterfail="adds"] .expander {
 	display: none;
 }
 #oops {
