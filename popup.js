@@ -7,9 +7,10 @@
   version 0.8 - Filter bar to find sites in long lists, highlight unsaved changed options
   version 0.8.1 - Fix icon bug applying filter to grouped list
   version 0.9 - More list layout options including URL on its own row and switch-to-tab button
+  version 1.0 - Font-size control, option to use an HTML link to leverage native keyboard navigation, right-click, etc.
 */
 
-/*** Lay out the list (later: get stored preferences first) ***/
+/*** Initialize Popup Page ***/
 
 // Default starting values
 var oPrefs = {
@@ -28,11 +29,15 @@ var oPrefs = {
 	filterbar: true,			// show filter bar on popup
 	caseinsens: true,			// filter is case insensitive
 	twoline: false,				// show URL on a separate row in the drop-down
-	switchtab: false			// show a switch tab button when applicable
+	switchtab: false,			// show a switch tab button when applicable
+	fullrowlinked: false,		// entire row is inside a hyperlink vs only URL
+	bodyfontsize: 14,			// numeric font size for popup
+	showfontbutton: true		// show font button on popup
 }
 
-// Update oPrefs from storage
-var listels;
+var listels; // for Switch-to-Tab
+
+// Update oPrefs from storage and build URLs list
 if (typeof browser != 'undefined'){ // live Firefox extension
 	browser.storage.local.get("prefs").then((results) => {
 		if (results.prefs != undefined){
@@ -45,10 +50,14 @@ if (typeof browser != 'undefined'){ // live Firefox extension
 		}
 		// Set dark theme
 		if (oPrefs.darktheme) document.body.className = 'dark';
+		// Set font size
+		document.body.style.setProperty('--body-size', oPrefs.bodyfontsize + 'px', 'important');
+		document.getElementById('fontsize').value = oPrefs.bodyfontsize;
 		// Update title for New Tab Page Top Sites
 		if (oPrefs.newtabpage) document.querySelector('h1 > span').textContent = 'Top Sites from New Tab Page';
-		// Show/Hide filter bar
+		// Hide filter bar and font size button if preferred
 		if (oPrefs.filterbar == false) document.getElementById('filterbar').style.display = 'none';
+		if (oPrefs.showfontbutton == false) document.getElementById('showzoom').style.display = 'none';
 		// Build URLs list
 		var gettingTopSites = browser.topSites.get({
 			newtab: oPrefs.newtabpage,
@@ -62,7 +71,8 @@ if (typeof browser != 'undefined'){ // live Firefox extension
 		gettingTopSites.then((arrSites) => {
 			var list = document.getElementById('frecentlist');
 			if (oPrefs.twoline) list.classList.add('twoline');
-			var newLI = document.getElementById('newLI');
+			if (oPrefs.fullrowlinked) var newLI = document.getElementById('newLIA');
+			else newLI = document.getElementById('newLI');
 			if (oPrefs.groupbyhost){
 				// read the list into a new object for grouping { hostname: x, listindex: [] }
 				var hostgroups = [], currhost, savedhost, i, j;
@@ -86,10 +96,14 @@ if (typeof browser != 'undefined'){ // live Firefox extension
 						li.setAttribute('title', arrSites[hostgroups[i].listindex[j]].title + ' - ' + arrSites[hostgroups[i].listindex[j]].url);
 						var fav = clone.querySelector('.favicon');
 						fav.setAttribute('src', fixPath(arrSites[hostgroups[i].listindex[j]]));
-						clone.querySelector('.pagetitle').appendChild(document.createTextNode(arrSites[hostgroups[i].listindex[j]].title));
+						li.querySelector('.pagetitle').textContent = arrSites[hostgroups[i].listindex[j]].title;
 						var ael = clone.querySelector('a');
 						ael.href = arrSites[hostgroups[i].listindex[j]].url;
-						ael.textContent = arrSites[hostgroups[i].listindex[j]].url;
+						if (oPrefs.fullrowlinked){
+							ael.querySelector('.row2').textContent = arrSites[hostgroups[i].listindex[j]].url;
+						} else {
+							ael.textContent = arrSites[hostgroups[i].listindex[j]].url;
+						}
 						if (oPrefs.opennewtab) ael.setAttribute('target', '_blank');
 						if (hostgroups[i].listindex.length > 1 && j == 0){ // first of group
 							clone.querySelector('.expander').setAttribute('title', hostgroups[i].hostname + ' group');
@@ -117,16 +131,20 @@ if (typeof browser != 'undefined'){ // live Firefox extension
 					li.setAttribute('title', arrSites[i].title + ' - ' + arrSites[i].url);
 					var fav = clone.querySelector('.favicon');
 					fav.setAttribute('src', fixPath(arrSites[i]));
-					clone.querySelector('.pagetitle').appendChild(document.createTextNode(arrSites[i].title));
+					li.querySelector('.pagetitle').textContent = arrSites[i].title;
 					var ael = clone.querySelector('a');
 					ael.href = arrSites[i].url;
-					ael.appendChild(document.createTextNode(arrSites[i].url));
+					if (oPrefs.fullrowlinked){
+						ael.querySelector('.row2').textContent = arrSites[i].url;
+					} else {
+						ael.textContent = arrSites[i].url;
+					}
 					if (oPrefs.opennewtab) ael.setAttribute('target', '_blank');
 					// Add the item to the list
 					list.appendChild(clone);
 				}
 			}
-			// Switch-to-tab
+			// Add Switch-to-tab icons
 			if (oPrefs.switchtab){
 				// check perms just in case
 				browser.permissions.contains({
@@ -167,6 +185,7 @@ if (typeof browser != 'undefined'){ // live Firefox extension
 	});
 } else { // saved web page?
 	document.getElementById('options').style.display = 'none';
+	document.getElementById('showzoom').style.display = 'none';
 	document.getElementById('frecentlist').classList.remove('popup');
 }
 
@@ -235,24 +254,30 @@ function openFrecent(evt){
 		}
 	} else if (tgt.className == 'stt') {
 		if (typeof browser != 'undefined'){
-			// Make the destination tab active
-			browser.tabs.update(
-				parseInt(li.getAttribute('stt')), {active: true}
-			).then((tab) => {
-				// In case the tab is in another window, focus whatever window it is
-				browser.windows.update(tab.windowId, {focused: true});
-				// Close the popup
-				self.close();
-			}).catch((err) => {
-				document.querySelector('#oops span').textContent = 'Not able to switch tabs: ' + err.message;
-				document.getElementById('oops').style.display = 'block';
-			});
+			// Get the current window ID
+			browser.windows.getCurrent().then((currWin) => {
+				var winId = currWin.id;
+				// Make the destination tab active
+				browser.tabs.update(
+					parseInt(li.getAttribute('stt')), {active: true}
+				).then((tab) => {
+					// In case the tab is in another window, focus whatever window it is
+					browser.windows.update(tab.windowId, {focused: true});
+					// Should we close the popup? Only if we switched within the same window
+					if (tab.windowId == winId) self.close();
+				}).catch((err) => {
+					document.querySelector('#oops span').textContent = 'Not able to switch tabs: ' + err.message;
+					document.getElementById('oops').style.display = 'block';
+				});
+			});				
 		} else {
 			alert('Please disregard this button in the current context.');
 		}
 	} else {
-		// Get the URL from the second span in the li
-		var siteUrl = li.querySelector('.row2 > a').textContent;
+		// If not in a popup, do nothing special
+		if (typeof browser == 'undefined') return;
+		// Get the page URL
+		var siteUrl = li.querySelector('a').href;
 		// Where to open
 		var CtrlCommand = (browser.runtime.PlatformOs == 'mac') ? evt.metaKey : evt.ctrlKey;
 		if (evt.shiftKey){ // Open new window
@@ -268,6 +293,7 @@ function openFrecent(evt){
 					document.getElementById('oops').style.display = 'block';
 				});
 			}
+			return false;
 		} else if ((oPrefs.opennewtab === true && !CtrlCommand && evt.button != 1) || 
 					(oPrefs.opennewtab === false && (CtrlCommand || evt.button == 1))){ // Open new tab
 			if (typeof browser != 'undefined'){
@@ -282,6 +308,7 @@ function openFrecent(evt){
 					document.getElementById('oops').style.display = 'block';
 				});
 			}
+			return false;
 		} else { // Navigate current tab
 			if (typeof browser != 'undefined'){
 				if (tgt.nodeName == 'A') evt.preventDefault(); // don't navigate the link!
@@ -293,6 +320,7 @@ function openFrecent(evt){
 					document.querySelector('#oops span').textContent = 'Error opening that URL: ' + err.message;
 					document.getElementById('oops').style.display = 'block';
 				});
+				return false;
 			}
 		}
 	}
@@ -356,7 +384,6 @@ function filterUrls(evt){
 	lastfilter = newval;
 }
 
-
 // List event handlers 
 document.getElementById('frecentlist').addEventListener('click', openFrecent, false);
 document.getElementById('frecentlist').addEventListener('mousedown', function(evt){
@@ -371,6 +398,7 @@ document.getElementById('frecentlist').addEventListener('mouseup', function(evt)
 		openFrecent(evt);
 	}
 }, false);
+
 // Filter bar and Options button event handlers
 document.getElementById('filterbar').addEventListener('keyup', filterUrls, false);
 document.getElementById('filterclear').addEventListener('click', filterUrls, false);
@@ -378,6 +406,30 @@ document.getElementById('options').addEventListener('click', function(evt){
 	browser.runtime.openOptionsPage();
 	self.close();
 }, false);
+
+// Font sizer event handlers
+document.getElementById('showzoom').addEventListener('click', function(evt){
+	// Toggle display of font sizer
+	var span = document.getElementById('fontsizer');
+	if (span.style.display == 'inline') span.style.display = '';
+	else span.style.display = 'inline';
+	evt.target.blur();
+}, false);
+document.getElementById('fontsize').addEventListener('input', function(evt){
+	var inpnum = evt.target;
+	if ((parseInt(inpnum.value) >= parseInt(inpnum.min)) && (parseInt(inpnum.value) <= parseInt(inpnum.max))){
+		oPrefs.bodyfontsize = parseInt(inpnum.value);
+		document.body.style.setProperty('--body-size', oPrefs.bodyfontsize + 'px', 'important');
+		// Update storage
+		browser.storage.local.set(
+			{prefs: oPrefs}
+		).catch((err) => {
+			document.getElementById('oops').textContent = 'Error updating storage: ' + err.message;
+			document.getElementById('oops').style.display = 'block';
+		});
+	}
+}, false);
+
 // Error message event handlers
 document.getElementById('btnclose').addEventListener('click', function(evt){
 	evt.target.parentNode.style.display = 'none';

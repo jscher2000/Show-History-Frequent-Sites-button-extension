@@ -7,9 +7,10 @@
   version 0.8 - Filter bar to find sites in long lists, highlight unsaved changed options
   version 0.8.1 - Fix icon bug applying filter to grouped list
   version 0.9 - More list layout options including URL on its own row and switch-to-tab button
+  version 1.0 - Font-size control, option to use an HTML link to leverage native keyboard navigation, right-click, etc.
 */
 
-/*** Initialize Page ***/
+/*** Initialize Options Page ***/
 
 // Default starting values
 var oPrefs = {
@@ -28,7 +29,10 @@ var oPrefs = {
 	filterbar: true,			// show filter bar on popup
 	caseinsens: true,			// filter is case insensitive
 	twoline: false,				// show URL on a separate row in the drop-down
-	switchtab: false			// show a switch tab button when applicable
+	switchtab: false,			// show a switch tab button when applicable
+	fullrowlinked: false,		// entire row is inside a hyperlink vs only URL
+	bodyfontsize: 14,			// numeric font size for popup
+	showfontbutton: true		// show font button on popup
 }
 
 // Update oPrefs from storage and update form values
@@ -81,6 +85,9 @@ function updatePrefs(evt){
 	var listmax = document.querySelector('input[name="listmax"]').value;
 	if (listmax >= 1 && listmax <= 100){
 		oPrefs.listmax = listmax;
+	} else {
+		alert('The number of items must be between 1 and 100. Not saving ' + listmax + '; keeping ' + oPrefs.listmax + '.');
+		document.querySelector('input[name="listmax"]').value = oPrefs.listmax;
 	}
 	// Update storage
 	browser.storage.local.set(

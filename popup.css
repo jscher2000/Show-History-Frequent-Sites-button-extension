@@ -1,4 +1,4 @@
-/* Show History Frequent Sites Button 0.9 */
+/* Show History Frequent Sites Button 1.0 */
 body {
 	color: #000;
 	background-color: #fff;
@@ -6,7 +6,8 @@ body {
 	padding: 0 8px 0 16px;
 	min-width: 700px;
 	min-height: 350px;
-	font-size: 14px;
+	--body-size: 16px;
+	font-size: var(--body-size);
 	overflow-y: scroll;
 }
 body.dark {
@@ -20,6 +21,7 @@ h1 {
 #alignright {
 	position: absolute;
 	right: 0;
+	top: -0.4em;
 }
 #filterbar {
 	width: 11em;
@@ -45,7 +47,7 @@ body.dark #filterbar {
 #filterbar:placeholder-shown + #filterclear {
 	display: none;
 }
-#options {
+#options, #showzoom {
 	font-size: 1.1em;
 	-moz-appearance: none;
 	padding: 1px 2px 3px 2px !important;
@@ -53,17 +55,28 @@ body.dark #filterbar {
 	background-color: transparent !important;
 	border-color: transparent !important;
 }
-#options:hover {
+#options:hover, #options:focus,
+#showzoom:hover, #showzoom:focus {
 	border-color: #000 !important;
 }
-body.dark #options:hover {
+body.dark #options:hover, body.dark #options:focus,
+body.dark #showzoom:hover, body.dark #showzoom:focus {
 	border-color: #f8f8f8 !important;
+}
+#fontsizer {
+	margin-right: 4px;
+	display: none;
+}
+#fontsize:out-of-range { 
+	background-color: rgba(255, 0, 0, 0.25); 
+	border: 2px solid red; 
 }
 ul {
 	list-style-type: none;
 	padding: 0;
 	margin: 0;
 	overflow-x: hidden;
+	outline-color: transparent;
 }
 li {
 	display: inline-block;
@@ -83,10 +96,10 @@ li:first-of-type {
 body.dark li {
 	border-color: #333;
 }
-li:hover {
+li:hover, a:focus {
 	background-color: #eee;
 }
-body.dark li:hover {
+body.dark li:hover, body.dark a:focus {
 	background-color: #333;
 }
 .favicon {
@@ -114,10 +127,31 @@ body.dark ul:not(.twoline) .row2::before {
 	text-decoration: none;
 	color: rgb(66, 143, 219);
 }
+body.dark .row2 > a {
+	color: rgb(69, 161, 255);
+}
 ul.twoline .row2 {
 	display: block;
 	padding-left: 24px;
 	margin-top: -4px;
+}
+/* fullrowlinked styles */
+li > a {
+	text-decoration: none;
+	display: block;
+	outline-color: rgb(66, 143, 219);
+}
+li > a > .row1 {
+	color: #000;
+}
+body.dark li > a > .row1 {
+	color: #f8f8f8;
+}
+li > a > .row2 {
+	color: rgb(66, 143, 219);
+}
+body.dark li > a > .row2 {
+	color: rgb(69, 161, 255);
 }
 /* Rules for group controls */
 .expander {
@@ -126,7 +160,7 @@ ul.twoline .row2 {
 	right: 0;
 	z-index: 100;
 	width: 24px;
-	height: 24px;
+	height: 27px;
 	border: 1px solid transparent;
 	border-radius: 4px;
 	background-color: rgba(255, 255, 255, 0.8);
@@ -188,7 +222,7 @@ span.stt {
 	right: 0;
 	z-index: 100;
 	width: 24px;
-	height: 24px;
+	height: 27px;
 	border: 1px solid transparent;
 	border-radius: 4px;
 	background-color: rgba(255, 255, 255, 0.8);
