@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="utf-8">
-<title>Options for Show History Frequent Sites Button</title>
+<title>Options for Show History Frequent Sites Button 0.9</title>
 <style>
 body {font-size: 16px;}
 h1 {font-size: 1.2em;}
@@ -11,10 +11,13 @@ h1 {font-size: 1.2em;}
 <body>
 <form>
 <h1>Adjust List Options &mdash; and don't forget to <button id="btnsave" type="button">Save Changes</button></h1>
-<p class="chk"><strong>List drop-down options</strong>:<br>
+<p class="chk"><strong>List content and layout options</strong>:<br>
 	<label for="listmax">Maximum number of URLs to list:</label> <input type="number" name="listmax" id="listmax" step="1" min="1" max="100" style="width: 45px; transform: scale(1.5) translateY(-2px); margin-left: 20px; padding-top: 0; padding-bottom: 0;"><br>
-	<label><input type="checkbox" name="darktheme" value="darktheme">Use a dark theme (light text on dark background)</label><br>
-	<label><input type="checkbox" name="filterbar" value="filterbar">Show filter bar</label> <label><input type="checkbox" name="caseinsens" value="caseinsens">Case insensitive</label>
+	<label><input type="checkbox" name="newtabpage" value="newtabpage">Show New Tab Page "Top Sites" instead of frequent URLs</label><br>
+	<label><input type="checkbox" name="groupbyhost" value="groupbyhost">Group URLs by site host name</label> <label><input type="checkbox" name="groupclosed" value="groupclosed">Collapse groups by default</label><br>
+	<label><input type="checkbox" name="oneperdomain" value="oneperdomain">Limit URLs to one per site to show more different sites</label><br>
+	<label><input type="checkbox" name="twoline" value="twoline">Show URL on a second line below the title</label><br>
+	<label><input type="checkbox" name="switchtab" value="switchtab">Show switch-to-tab button (requires tabs permission)</label> <button id="revoketabs" type="button" chks="switchtab" perm="tabs">Revoke tabs permission</button>
 </p>
 <p class="chk"><strong>Open in new tab options</strong>:<br>
 	<label><input type="checkbox" name="opennewtab" value="opennewtab">Open in a new tab by default (otherwise, use Ctrl+click (on Mac, Command+click) or middle-click to open URL in a new tab)</label><br>
@@ -23,10 +26,9 @@ h1 {font-size: 1.2em;}
 <p class="chk"><strong>Open in new window options</strong> (use Shift+click to open URL in a new window):<br>
 	<label><input type="checkbox" name="newwinprivate" value="newwinprivate">Make the window private by default (otherwise, use Shift+Alt+click for a private window)</label>
 </p>
-<p class="chk"><strong>Miscellaneous options</strong>:<br>
-	<label><input type="checkbox" name="newtabpage" value="newtabpage">Show New Tab Page "Top Sites" instead of frequent URLs</label><br>
-	<label><input type="checkbox" name="oneperdomain" value="oneperdomain">Limit URLs to one per site to show more different sites</label><br>
-	<label><input type="checkbox" name="groupbyhost" value="groupbyhost">Group URLs by site host name</label> <label><input type="checkbox" name="groupclosed" value="groupclosed">Collapse groups by default</label>
+<p class="chk"><strong>Drop-down options</strong>:<br>
+	<label><input type="checkbox" name="darktheme" value="darktheme">Use a dark theme (light text on dark background)</label><br>
+	<label><input type="checkbox" name="filterbar" value="filterbar">Show filter bar</label> <label><input type="checkbox" name="caseinsens" value="caseinsens">Case insensitive</label>
 </p>
 <p id="oops"></p>
 </form>

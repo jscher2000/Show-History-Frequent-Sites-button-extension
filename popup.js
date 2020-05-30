@@ -6,6 +6,7 @@
   version 0.7.1 - Restyle error messages in popup
   version 0.8 - Filter bar to find sites in long lists, highlight unsaved changed options
   version 0.8.1 - Fix icon bug applying filter to grouped list
+  version 0.9 - More list layout options including URL on its own row and switch-to-tab button
 */
 
 /*** Lay out the list (later: get stored preferences first) ***/
@@ -25,11 +26,14 @@ var oPrefs = {
 	groupbyhost: false,			// group list by hostname
 	groupclosed: true,			// group is initially collapsed
 	filterbar: true,			// show filter bar on popup
-	caseinsens: true			// filter is case insensitive
+	caseinsens: true,			// filter is case insensitive
+	twoline: false,				// show URL on a separate row in the drop-down
+	switchtab: false			// show a switch tab button when applicable
 }
 
 // Update oPrefs from storage
-if (typeof browser != 'undefined'){
+var listels;
+if (typeof browser != 'undefined'){ // live Firefox extension
 	browser.storage.local.get("prefs").then((results) => {
 		if (results.prefs != undefined){
 			if (JSON.stringify(results.prefs) != '{}'){
@@ -57,6 +61,7 @@ if (typeof browser != 'undefined'){
 		});
 		gettingTopSites.then((arrSites) => {
 			var list = document.getElementById('frecentlist');
+			if (oPrefs.twoline) list.classList.add('twoline');
 			var newLI = document.getElementById('newLI');
 			if (oPrefs.groupbyhost){
 				// read the list into a new object for grouping { hostname: x, listindex: [] }
@@ -79,16 +84,15 @@ if (typeof browser != 'undefined'){
 						// Populate the template
 						var li = clone.querySelector('li');
 						li.setAttribute('title', arrSites[hostgroups[i].listindex[j]].title + ' - ' + arrSites[hostgroups[i].listindex[j]].url);
-						var fav = clone.querySelector('img');
+						var fav = clone.querySelector('.favicon');
 						fav.setAttribute('src', fixPath(arrSites[hostgroups[i].listindex[j]]));
-						var spans = clone.querySelectorAll('span');
-						spans[0].appendChild(document.createTextNode(arrSites[hostgroups[i].listindex[j]].title));
+						clone.querySelector('.pagetitle').appendChild(document.createTextNode(arrSites[hostgroups[i].listindex[j]].title));
 						var ael = clone.querySelector('a');
 						ael.href = arrSites[hostgroups[i].listindex[j]].url;
 						ael.textContent = arrSites[hostgroups[i].listindex[j]].url;
 						if (oPrefs.opennewtab) ael.setAttribute('target', '_blank');
 						if (hostgroups[i].listindex.length > 1 && j == 0){ // first of group
-							spans[2].setAttribute('title', hostgroups[i].hostname + ' group');
+							clone.querySelector('.expander').setAttribute('title', hostgroups[i].hostname + ' group');
 							li.setAttribute('hostname', hostgroups[i].hostname);
 							li.setAttribute('hostclosed', false);
 							if (oPrefs.groupclosed) li.setAttribute('hostbutton', 'closed');
@@ -111,10 +115,9 @@ if (typeof browser != 'undefined'){
 					// Populate the template
 					var li = clone.querySelector('li');
 					li.setAttribute('title', arrSites[i].title + ' - ' + arrSites[i].url);
-					var fav = clone.querySelector('img');
+					var fav = clone.querySelector('.favicon');
 					fav.setAttribute('src', fixPath(arrSites[i]));
-					var spans = clone.querySelectorAll('span');
-					spans[0].appendChild(document.createTextNode(arrSites[i].title));
+					clone.querySelector('.pagetitle').appendChild(document.createTextNode(arrSites[i].title));
 					var ael = clone.querySelector('a');
 					ael.href = arrSites[i].url;
 					ael.appendChild(document.createTextNode(arrSites[i].url));
@@ -123,14 +126,48 @@ if (typeof browser != 'undefined'){
 					list.appendChild(clone);
 				}
 			}
+			// Switch-to-tab
+			if (oPrefs.switchtab){
+				// check perms just in case
+				browser.permissions.contains({
+					permissions: [
+						"tabs"
+					]
+				}).then((result) => {
+					// look up URLs and flag open ones
+					if (result === true){
+						// Gather all URLs in the list
+						listels = document.getElementById('frecentlist').getElementsByTagName('li');
+						var listurls = [];
+						for (i=0; i<listels.length; i++){
+							listurls.push(listels[i].querySelector('a').href);
+						}
+						// Use the API to see which URLs are open in a tab
+						browser.tabs.query({
+							url: listurls,
+							discarded: false,
+							hidden: false
+						}).then((foundtabs) => {
+							// Update the list with info on open tabs
+							for (i=0; i<foundtabs.length; i++){
+								var index = listurls.findIndex(url => url === foundtabs[i].url);
+								/* if multiple tabs have this URL, stt probably will end up set to the id
+								of the last opened tab, which may not be the one the user interacted with
+								most recently, so that's a little TODO to address in some manner? */
+								if (index > -1) listels[index].setAttribute('stt', foundtabs[i].id);
+							}
+						});
+					}
+				});
+			}
 		});
 	}).catch((err) => {
 		document.querySelector('#oops span').textContent = 'Error retrieving "prefs" from storage or building list: ' + err.message;
 		document.getElementById('oops').style.display = 'block';
 	});
-} else {
+} else { // saved web page?
 	document.getElementById('options').style.display = 'none';
-	document.getElementById('frecentlist').className = '';
+	document.getElementById('frecentlist').classList.remove('popup');
 }
 
 function fixPath(site){
@@ -161,7 +198,7 @@ function openFrecent(evt){
 		return;
 	}
 	var hb = li.getAttribute('hostbutton') || '';
-	// Is this a group control?
+	// Is this a group control? Switch-to-tab? Or normal.
 	if (tgt.className == 'expander' && ['open', 'closed', 'additional'].includes(hb)){
 		// Handle opening/closing group
 		var hn = li.getAttribute('hostname');
@@ -196,9 +233,26 @@ function openFrecent(evt){
 			default:
 				// do nothing
 		}
+	} else if (tgt.className == 'stt') {
+		if (typeof browser != 'undefined'){
+			// Make the destination tab active
+			browser.tabs.update(
+				parseInt(li.getAttribute('stt')), {active: true}
+			).then((tab) => {
+				// In case the tab is in another window, focus whatever window it is
+				browser.windows.update(tab.windowId, {focused: true});
+				// Close the popup
+				self.close();
+			}).catch((err) => {
+				document.querySelector('#oops span').textContent = 'Not able to switch tabs: ' + err.message;
+				document.getElementById('oops').style.display = 'block';
+			});
+		} else {
+			alert('Please disregard this button in the current context.');
+		}
 	} else {
 		// Get the URL from the second span in the li
-		var siteUrl = li.querySelectorAll('span')[1].textContent;
+		var siteUrl = li.querySelector('.row2 > a').textContent;
 		// Where to open
 		var CtrlCommand = (browser.runtime.PlatformOs == 'mac') ? evt.metaKey : evt.ctrlKey;
 		if (evt.shiftKey){ // Open new window
@@ -256,7 +310,8 @@ function filterUrls(evt){
 	// If no change from last filter, exit
 	if (newval == lastfilter) return;
 	// Apply the filter
-	var listels = document.querySelectorAll('#frecentlist li'), i, j, words, title;
+	listels = document.querySelectorAll('#frecentlist li');
+	var i, j, words, title;
 	if (newval.length === 0){ //reset all to visible
 		for (i=0; i<listels.length; i++){
 			listels[i].removeAttribute('filterfail');

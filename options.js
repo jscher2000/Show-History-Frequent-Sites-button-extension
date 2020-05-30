@@ -6,6 +6,7 @@
   version 0.7.1 - Restyle error messages in popup
   version 0.8 - Filter bar to find sites in long lists, highlight unsaved changed options
   version 0.8.1 - Fix icon bug applying filter to grouped list
+  version 0.9 - More list layout options including URL on its own row and switch-to-tab button
 */
 
 /*** Initialize Page ***/
@@ -25,7 +26,9 @@ var oPrefs = {
 	groupbyhost: false,			// group list by hostname
 	groupclosed: true,			// group is initially collapsed
 	filterbar: true,			// show filter bar on popup
-	caseinsens: true			// filter is case insensitive
+	caseinsens: true,			// filter is case insensitive
+	twoline: false,				// show URL on a separate row in the drop-down
+	switchtab: false			// show a switch tab button when applicable
 }
 
 // Update oPrefs from storage and update form values
@@ -47,6 +50,20 @@ browser.storage.local.get("prefs").then((results) => {
 	// Set the numeric input
 	var listmax = document.querySelector('input[name="listmax"]');
 	listmax.value = oPrefs.listmax;
+	// Set optional permission attributes
+	//    tab
+	browser.permissions.contains({
+		permissions: [
+			"tabs"
+		]
+	}).then((result) => {
+		if (result === false){
+			document.forms[0].elements['switchtab'].setAttribute('perm', 'need-tabs');
+			document.getElementById('revoketabs').setAttribute('disabled', 'disabled');
+		} else {
+			document.forms[0].elements['switchtab'].setAttribute('perm', 'have-tabs');
+		}
+	});
 }).catch((err) => {
 	document.getElementById('oops').textContent = 'Error retrieving "prefs" from storage or setting up form: ' + err.message;
 });
@@ -110,7 +127,72 @@ function lightSaveBtn(evt){
 	else document.getElementById('btnsave').style.backgroundColor = '';
 }
 
+function optionalPerm(evt){
+	var toCheck = '';
+	switch (evt.target.name){
+		case 'switchtab':
+			if (evt.target.checked && evt.target.getAttribute('perm') == 'need-tabs'){
+				toCheck = 'tabs';
+			}
+			break;
+		default:
+			// WTF?
+	}
+	if (toCheck == '') return;
+	// Request permission
+	browser.permissions.request({
+		permissions: [
+			toCheck
+		]
+	}).then((result) => {
+		if (result === false){
+			// flip the checkbox back to unchecked
+			window.setTimeout(function(){
+				evt.target.click();
+			}, 100);
+		} else {
+			evt.target.setAttribute('perm', 'have-tabs');
+			document.getElementById('revoketabs').removeAttribute('disabled');
+		}
+	})
+}
+
+function revokePerm(evt){
+	var perm = evt.target.getAttribute('perm');
+	browser.permissions.remove({
+		permissions: [
+			perm
+		]
+	}).then((results) => {
+		if (results){
+			var arrCtrls = evt.target.getAttribute('chks').split(',');
+			for (var i=0; i<arrCtrls.length; i++){
+				var chk = document.forms[0].elements[arrCtrls[i]];
+				chk.setAttribute('perm', 'need-' + perm);
+				if (oPrefs[chk.name] == true){
+					oPrefs[chk.name] = false;
+					browser.storage.local.set(
+						{prefs: oPrefs}
+					);
+				}
+				if (chk.checked){
+					// flip the checkbox back to unchecked
+					window.setTimeout(function(){
+						chk.click();
+						console.log(chk);
+					}, 100);
+				}
+			}
+			evt.target.setAttribute('disabled', 'disabled');
+		} else {
+			alert('Permission revocation was not successul for some reason.');
+		}
+	});
+}
+
 // Attach event handlers 
 document.getElementById('btnsave').addEventListener('click', updatePrefs, false);
 document.forms[0].addEventListener('change', lightSaveBtn, false);
 document.getElementById('listmax').addEventListener('keyup', lightSaveBtn, false);
+document.forms[0].elements['switchtab'].addEventListener('change', optionalPerm, false);
+document.getElementById('revoketabs').addEventListener('click', revokePerm, false);

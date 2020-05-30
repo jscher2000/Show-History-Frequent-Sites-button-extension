@@ -1,4 +1,4 @@
-/* Show History Frequent Sites Button 0.8 */
+/* Show History Frequent Sites Button 0.9 */
 body {
 	color: #000;
 	background-color: #fff;
@@ -63,13 +63,16 @@ ul {
 	list-style-type: none;
 	padding: 0;
 	margin: 0;
+	overflow-x: hidden;
 }
 li {
 	display: inline-block;
 	width: 100%;
-	padding: 4px 0;
+	margin: 0;
+	padding: 4px 0 2px;
 	border-top: 1px solid #eee;
 	position: relative;
+	white-space: nowrap;
 }
 ul.popup > li {
 	cursor: pointer;
@@ -86,52 +89,65 @@ li:hover {
 body.dark li:hover {
 	background-color: #333;
 }
-li > img {
-	display: inline-block;
+.favicon {
+	vertical-align: bottom;
 	margin-right: 4px;
+	margin-bottom: 1px;
 }
-li > span {
+.row1, .row2 {
 	display: inline-block;
-}
-li > span:nth-of-type(1), li > span:nth-of-type(2) {
-	max-width: calc(50% - 20px);
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
 }
-li > span:nth-of-type(2)::before {
+ul:not(.twoline) .row1 {
+	max-width: 60%;
+}
+ul:not(.twoline) .row2::before {
 	content: "— ";
 	color: #000;
 }
-body.dark li > span:nth-of-type(2)::before {
+body.dark ul:not(.twoline) .row2::before {
 	color: #f8f8f8;
 }
-li > span:nth-of-type(2), {
-	color: rgb(66, 143, 219);
-}
-li > span:nth-of-type(2) > a {
+.row2 > a {
 	text-decoration: none;
 	color: rgb(66, 143, 219);
 }
+ul.twoline .row2 {
+	display: block;
+	padding-left: 24px;
+	margin-top: -4px;
+}
 /* Rules for group controls */
-li > span:nth-of-type(3){
+.expander {
 	position: absolute;
+	top: 0;
 	right: 0;
 	z-index: 100;
-	width: 21px;
+	width: 24px;
+	height: 24px;
 	border: 1px solid transparent;
 	border-radius: 4px;
+	background-color: rgba(255, 255, 255, 0.8);
+	padding-top: 1px;
+}
+body.dark .expander {
+	background-color: rgba(0, 0, 0, 0.7);
+}
+li:not([hostbutton]) .expander {
+	display: none;
 }
 li[hostbutton="closed"] > .expander::before {
 	content: "▼";
-	padding-left: 3px;
+	padding-left: 5px;
 }
 body.dark li[hostbutton="closed"] > .expander::before {
 	content: "▽";
 }
 li[hostbutton="open"] > .expander::before {
 	content: "▲";
-	padding-left: 3px;
+	padding-left: 5px;
 }
 body.dark li[hostbutton="open"] > .expander::before {
 	content: "△";
@@ -144,7 +160,7 @@ body.dark li[hostbutton="closed"] > .expander:hover, body.dark li[hostbutton="op
 }
 li[hostbutton="additional"] > .expander::before {
 	content: "—";
-	padding-left: 3px;
+	padding-left: 5px;
 	color: #000;
 }
 body.dark li[hostbutton="additional"] > .expander::before {
@@ -163,6 +179,35 @@ li[filterfail="true"][hostbutton="closed"] > span:not(:nth-of-type(3)) {
 	opacity: 0.4;
 }
 li[filterfail="adds"] .expander {
+	display: none;
+}
+/* Switch-to-tab */
+span.stt {
+	position: absolute;
+	top: 0;
+	right: 0;
+	z-index: 100;
+	width: 24px;
+	height: 24px;
+	border: 1px solid transparent;
+	border-radius: 4px;
+	background-color: rgba(255, 255, 255, 0.8);
+	background-image: url(icons/switch-tab-32.png);
+	background-size: 16px;
+	background-repeat: no-repeat;
+	background-position: center;
+}
+body.dark span.stt {
+	background-color: rgba(0, 0, 0, 0.7);
+}
+li[hostbutton] span.stt {
+	/* Leave room for group controls */
+	right: 25px;
+}
+span.stt:hover {
+	border-color: #008eaf;
+}
+li:not([stt]) span.stt, ul:not(.popup) span.stt {
 	display: none;
 }
 #oops {
