@@ -8,6 +8,8 @@
   version 0.8.1 - Fix icon bug applying filter to grouped list
   version 0.9 - More list layout options including URL on its own row and switch-to-tab button
   version 1.0 - Font-size control, option to use an HTML link to leverage native keyboard navigation, right-click, etc.
+  version 1.1 - Option to show "blocked" URLs dismissed from the new tab page, option for header open/close button
+  version 1.2 - Popup resizer, style tweaks
 */
 
 /*** Initialize Options Page ***/
@@ -32,7 +34,12 @@ var oPrefs = {
 	switchtab: false,			// show a switch tab button when applicable
 	fullrowlinked: false,		// entire row is inside a hyperlink vs only URL
 	bodyfontsize: 14,			// numeric font size for popup
-	showfontbutton: true		// show font button on popup
+	showfontbutton: true,		// show font button on popup
+	showtoggler: true,			// show button to open/close header
+	collapseHeader: false,		// hide header by default
+	bodywidth: 750,				// numeric pixel min-width for popup
+	bodyheight: 350,			// numeric pixel min-height for popup
+	showResizer: true			// show width/height button in popup
 }
 
 // Update oPrefs from storage and update form values
@@ -79,6 +86,13 @@ function updatePrefs(evt){
 	// Checkboxes
 	var chks = document.querySelectorAll('.chk input[type="checkbox"]');
 	for (var i=0; i<chks.length; i++){
+		if (chks[i].checked && chks[i].hasAttribute('truesame')){
+			// only if this was a user change
+			if (oPrefs[chks[i].name] != chks[i].checked){
+				oPrefs[chks[i].getAttribute('truesame')] = chks[i].checked;
+				document.querySelector('input[name="' + chks[i].getAttribute('truesame') + '"]').checked = chks[i].checked;
+			}
+		}
 		oPrefs[chks[i].name] = chks[i].checked;
 	}
 	// Update listmax
@@ -203,3 +217,8 @@ document.forms[0].addEventListener('change', lightSaveBtn, false);
 document.getElementById('listmax').addEventListener('keyup', lightSaveBtn, false);
 document.forms[0].elements['switchtab'].addEventListener('change', optionalPerm, false);
 document.getElementById('revoketabs').addEventListener('click', revokePerm, false);
+document.getElementById('resetSize').addEventListener('click', function(evt){
+	oPrefs.bodywidth = 750;
+	oPrefs.bodyheight = 350;
+	updatePrefs(evt);
+}, false);

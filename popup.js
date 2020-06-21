@@ -8,6 +8,8 @@
   version 0.8.1 - Fix icon bug applying filter to grouped list
   version 0.9 - More list layout options including URL on its own row and switch-to-tab button
   version 1.0 - Font-size control, option to use an HTML link to leverage native keyboard navigation, right-click, etc.
+  version 1.1 - Option to show "blocked" URLs dismissed from the new tab page, option for header open/close button
+  version 1.2 - Popup resizer, style tweaks
 */
 
 /*** Initialize Popup Page ***/
@@ -32,7 +34,12 @@ var oPrefs = {
 	switchtab: false,			// show a switch tab button when applicable
 	fullrowlinked: false,		// entire row is inside a hyperlink vs only URL
 	bodyfontsize: 14,			// numeric font size for popup
-	showfontbutton: true		// show font button on popup
+	showfontbutton: true,		// show font button on popup
+	showtoggler: true,			// show button to open/close header
+	collapseHeader: false,		// hide header by default
+	bodywidth: 750,				// numeric pixel min-width for popup
+	bodyheight: 350,			// numeric pixel min-height for popup
+	showResizer: true			// show width/height button in popup
 }
 
 var listels; // for Switch-to-Tab
@@ -48,16 +55,25 @@ if (typeof browser != 'undefined'){ // live Firefox extension
 				}
 			}
 		}
+		// Set width and height and populate inputs
+		document.body.style.setProperty('--body-width', oPrefs.bodywidth + 'px', 'important');
+		document.body.style.setProperty('--body-height', oPrefs.bodyheight + 'px', 'important');
+		document.getElementById('popwidth').value = oPrefs.bodywidth;
+		document.getElementById('popheight').value = oPrefs.bodyheight;
 		// Set dark theme
 		if (oPrefs.darktheme) document.body.className = 'dark';
 		// Set font size
 		document.body.style.setProperty('--body-size', oPrefs.bodyfontsize + 'px', 'important');
 		document.getElementById('fontsize').value = oPrefs.bodyfontsize;
 		// Update title for New Tab Page Top Sites
-		if (oPrefs.newtabpage) document.querySelector('h1 > span').textContent = 'Top Sites from New Tab Page';
-		// Hide filter bar and font size button if preferred
+		if (oPrefs.newtabpage) document.getElementById('listtitle').textContent = 'Top Sites from New Tab Page';
+		// Hide filter bar, font size, and resizer buttons if preferred
 		if (oPrefs.filterbar == false) document.getElementById('filterbar').style.display = 'none';
 		if (oPrefs.showfontbutton == false) document.getElementById('showzoom').style.display = 'none';
+		if (oPrefs.showResizer == false) document.getElementById('showresize').style.display = 'none';
+		// Hide header and controls and enable toggler if preferred
+		if (oPrefs.collapseHeader) document.getElementsByTagName('header')[0].setAttribute('collapse', 'true');
+		else if (oPrefs.showtoggler) document.getElementsByTagName('header')[0].setAttribute('collapse', 'false');
 		// Build URLs list
 		var gettingTopSites = browser.topSites.get({
 			newtab: oPrefs.newtabpage,
@@ -430,7 +446,80 @@ document.getElementById('fontsize').addEventListener('input', function(evt){
 	}
 }, false);
 
+// Header toggler event handler
+document.getElementById('toggler').addEventListener('click', function(evt){
+	// Toggle display of header and flip the triangle
+	var hdr = document.getElementsByTagName('header')[0];
+	if (hdr.getAttribute('collapse') == 'true'){
+		hdr.setAttribute('collapse', 'false');
+		oPrefs.collapseHeader = false;
+	} else {
+		hdr.setAttribute('collapse', 'true');
+		oPrefs.collapseHeader = true;
+	}
+	// Update storage
+	browser.storage.local.set(
+		{prefs: oPrefs}
+	).catch((err) => {
+		document.getElementById('oops').textContent = 'Error updating storage: ' + err.message;
+		document.getElementById('oops').style.display = 'block';
+	});
+	evt.target.blur();
+}, false);
+
 // Error message event handlers
 document.getElementById('btnclose').addEventListener('click', function(evt){
 	evt.target.parentNode.style.display = 'none';
+}, false);
+
+// Popup resizer event handlers
+document.getElementById('showresize').addEventListener('click', function(evt){
+	document.getElementById('currwidth').textContent = document.documentElement.clientWidth;
+	document.getElementById('currheight').textContent = document.documentElement.clientHeight;
+	document.getElementById('resizer').style.display = 'block';
+}, false);
+document.getElementById('popwidth').addEventListener('input', function(evt){
+	var inpnum = evt.target;
+	if (inpnum.validity.valid === true){
+		document.body.style.setProperty('--body-width', inpnum.value + 'px', 'important');
+	}
+}, false);
+document.getElementById('popheight').addEventListener('input', function(evt){
+	var inpnum = evt.target;
+	if (inpnum.validity.valid === true){
+		document.body.style.setProperty('--body-height', inpnum.value + 'px', 'important');
+	}
+}, false);
+document.getElementById('btnSave').addEventListener('click', function(evt){
+	// Check values are in range
+	var w = document.getElementById('popwidth');
+	if (w.validity.valid === true) oPrefs.bodywidth = parseInt(w.value);
+	else console.log('width is not valid');
+	var h = document.getElementById('popheight');
+	if (h.validity.valid === true) oPrefs.bodyheight = parseInt(h.value);
+	else console.log('height is not valid');
+	document.getElementById('resizer').style.display = '';
+	oPrefs.showResizer = false;
+	// Update storage
+	browser.storage.local.set(
+		{prefs: oPrefs}
+	).catch((err) => {
+		document.getElementById('oops').textContent = 'Error updating storage: ' + err.message;
+		document.getElementById('oops').style.display = 'block';
+	});
+}, false);
+document.getElementById('btnCancel').addEventListener('click', function(evt){
+	document.getElementById('resizer').style.display = '';
+}, false);
+document.getElementById('btnRemove').addEventListener('click', function(evt){
+	document.getElementById('resizer').style.display = '';
+	document.getElementById('showresize').style.display = 'none';
+	oPrefs.showResizer = false;
+	// Update storage
+	browser.storage.local.set(
+		{prefs: oPrefs}
+	).catch((err) => {
+		document.getElementById('oops').textContent = 'Error updating storage: ' + err.message;
+		document.getElementById('oops').style.display = 'block';
+	});
 }, false);

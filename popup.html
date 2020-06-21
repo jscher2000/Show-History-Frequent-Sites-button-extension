@@ -3,17 +3,21 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <link rel="stylesheet" href="popup.css" type="text/css">
-<title>Frequent Sites Button 1.0 Popup</title>
+<title>Frequent Sites Button 1.2 Popup</title>
 </head>
 <body>
 <header>
-	<h1 id="dialogtitle"><span>Frequent Site URLs</span><span id="alignright"><input type="text" id="filterbar" placeholder="Filter list" value=""><button id="filterclear" type="button" title="Clear filter">❌</button><button id="showzoom" type="button" title="Show/Hide Font Sizer">&#8314;&#8725;&#8331;</button><span id="fontsizer"><input type="number" name="fontsize" id="fontsize" step="1" min="8" max="20" style="width: 38px; transform: scale(1.5) translateY(-2px); margin-left: 0.6em; padding-top: 0; padding-bottom: 0;" title="Choose a font size between 8 and 24 pixels"></span><button id="options" type="button" title="Open Options page">⚙️</button></span></h1>
+	<span id="toggler" title="Open/Close the Header"><span id="toggleopen">▼</span><span id="toggleclosed">▲</span></span>
+	<h1 id="dialogtitle"><span id="listtitle">Frequent Site URLs</span><span id="controls"><input type="text" id="filterbar" placeholder="Filter list" value=""><button id="filterclear" type="button" title="Clear filter">❌</button><button id="showzoom" type="button" title="Show/Hide Font Sizer">&#8314;&#8725;&#8331;</button><span id="fontsizer"><input type="number" name="fontsize" id="fontsize" step="1" min="8" max="20" style="width: 38px; transform: scale(1.5) translateY(-2px); margin-left: 0.6em; padding-top: 0; padding-bottom: 0;" title="Choose a font size between 8 and 24 pixels"></span><button id="showresize" type="button" title="Show/Hide Resizer">↔</button><button id="options" type="button" title="Open Options page">⚙️</button></span></h1>
 </header>
 <main>
 <ul id="frecentlist" class="popup" tabindex="-1">
 </ul>
 <p id="oops"><span></span><button id="btnclose" type="button" title="Close">X</button></p>
 </main>
+<div id="resizer"><p>Current width: <span id="currwidth"></span> (max is 783 due to scrollbar) &bull; <label>Minimum width setting: <input type="number" name="popwidth" id="popwidth" step="1" min="500" max="800" title="Set drop-down minimum width between 500 and 800 pixels"></label></p>
+<p>Current height: <span id="currheight"></span> (max is 600) &bull; <label>Minimum height setting: <input type="number" name="popheight" id="popheight" step="1" min="250" max="600" title="Set drop-down minimum height between 250 and 600 pixels"></label></p>
+<p><button type="button" id="btnSave">Save &amp; Close</button> <button type="button" id="btnCancel">Cancel Resize</button> <button type="button" id="btnRemove">Remove Button</button></p></div>
 </body>
 <script type="text/javascript" src="popup.js"></script>
 <template id="newLI"><li><span class="row1"><img style="width:16px;height:16px" src="iconsrc" class="favicon"> <span class="pagetitle"></span></span> <span class="row2"><a href=""></a></span><span class="expander"></span><span class="stt" title="Switch to open tab with this URL"></span></li></template>

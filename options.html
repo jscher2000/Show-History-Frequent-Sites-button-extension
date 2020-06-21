@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="utf-8">
-<title>Options for Show History Frequent Sites Button 1.0</title>
+<title>Options for Show History Frequent Sites Button 1.2</title>
 <style>
 body {font-size: 16px;}
 h1 {font-size: 1.2em;}
@@ -15,10 +15,13 @@ h1 {font-size: 1.2em;}
 <form>
 <h1>Adjust List Options &mdash; and don't forget to <button id="btnsave" type="button">Save Changes</button></h1>
 <p class="chk"><strong>List content and layout options</strong>:<br>
+	<em>topSites API parameters:</em><br>
 	<label for="listmax">Maximum number of URLs to list:</label> <input type="number" name="listmax" id="listmax" step="1" min="1" max="100" style="width: 45px; transform: scale(1.5) translateY(-2px); margin-left: 20px; padding-top: 0; padding-bottom: 0;"><span id="listrange">(Between 1 and 100)</span><br>
 	<label><input type="checkbox" name="newtabpage" value="newtabpage">Show New Tab Page "Top Sites" instead of frequent URLs</label><br>
-	<label><input type="checkbox" name="groupbyhost" value="groupbyhost">Group URLs by site host name</label> <label><input type="checkbox" name="groupclosed" value="groupclosed">Collapse groups by default</label><br>
 	<label><input type="checkbox" name="oneperdomain" value="oneperdomain">Limit URLs to one per site to show more different sites</label><br>
+	<label><input type="checkbox" name="showBlocked" value="showBlocked">Include URLs "dismissed" from the new tab page</label><br>
+	<em>Layout options:</em><br>
+	<label><input type="checkbox" name="groupbyhost" value="groupbyhost">Group URLs by site host name</label> <label><input type="checkbox" name="groupclosed" value="groupclosed">Collapse groups by default</label><br>
 	<label><input type="checkbox" name="twoline" value="twoline">Show URL on a second line below the title</label><br>
 	<label><input type="checkbox" name="switchtab" value="switchtab">Show switch-to-tab button (requires tabs permission)</label> <button id="revoketabs" type="button" chks="switchtab" perm="tabs">Revoke tabs permission</button><br>
 	<label><input type="checkbox" name="fullrowlinked" value="fullrowlinked">Entire row (icon, title, URL, blank space) is a real link</label>
@@ -33,7 +36,9 @@ h1 {font-size: 1.2em;}
 <p class="chk"><strong>Drop-down options</strong>:<br>
 	<label><input type="checkbox" name="darktheme" value="darktheme">Use a dark theme (light text on dark background)</label><br>
 	<label><input type="checkbox" name="filterbar" value="filterbar">Show filter bar</label> <label><input type="checkbox" name="caseinsens" value="caseinsens">Case insensitive</label><br>
-	<label><input type="checkbox" name="showfontbutton" value="showfontbutton">Show font sizer (&#8314;&#8725;&#8331;) button</label>
+	<label><input type="checkbox" name="showfontbutton" value="showfontbutton">Show font sizer (&#8314;&#8725;&#8331;) button</label><br>
+	<label><input type="checkbox" name="showResizer" value="showResizer">Show popup resizer (↔) button</label> (800x600 max) <button type="button" id="resetSize">Reset drop-down size &amp; Save Changes</button><br>
+	<label><input type="checkbox" name="showtoggler" value="showtoggler">Show button to open ▼ / close ▲ the header</label> <label><input type="checkbox" name="collapseHeader" value="collapseHeader" truesame="showtoggler">Hide the header</label>
 </p>
 <p id="oops"></p>
 </form>

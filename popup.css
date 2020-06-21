@@ -1,11 +1,13 @@
-/* Show History Frequent Sites Button 1.0 */
+/* Show History Frequent Sites Button 1.2 */
 body {
 	color: #000;
 	background-color: #fff;
 	margin: 0;
-	padding: 0 8px 0 16px;
-	min-width: 700px;
-	min-height: 350px;
+	padding: 0 8px;
+	--body-width: 800px;
+	min-width: calc(var(--body-width) - 17px); /* adjust for scrollbar */
+	--body-height: 600px;
+	min-height: var(--body-height);
 	--body-size: 16px;
 	font-size: var(--body-size);
 	overflow-y: scroll;
@@ -14,11 +16,13 @@ body.dark {
 	color: #f8f8f8;
 	background-color: #000;
 }
-h1 {
+#dialogtitle {
 	font-size: 1.25em;
+	font-weight: normal;
 	position: relative;
+	padding-left: 8px;
 }
-#alignright {
+#controls {
 	position: absolute;
 	right: 0;
 	top: -0.4em;
@@ -29,7 +33,7 @@ h1 {
 	border-radius: 4px;
 	padding-left: 4px;
 }
-body.dark #filterbar {
+body.dark #filterbar, body.dark #fontsize {
 	color: #f8f8f8;
 	background-color: #333;
 }
@@ -47,7 +51,7 @@ body.dark #filterbar {
 #filterbar:placeholder-shown + #filterclear {
 	display: none;
 }
-#options, #showzoom {
+#options, #showzoom, #showresize {
 	font-size: 1.1em;
 	-moz-appearance: none;
 	padding: 1px 2px 3px 2px !important;
@@ -55,12 +59,17 @@ body.dark #filterbar {
 	background-color: transparent !important;
 	border-color: transparent !important;
 }
+body.dark #options, body.dark #showzoom, body.dark #showresize {
+	color: #f8f8f8;
+}
 #options:hover, #options:focus,
-#showzoom:hover, #showzoom:focus {
+#showzoom:hover, #showzoom:focus,
+#showresize:hover, #showresize:focus {
 	border-color: #000 !important;
 }
 body.dark #options:hover, body.dark #options:focus,
-body.dark #showzoom:hover, body.dark #showzoom:focus {
+body.dark #showzoom:hover, body.dark #showzoom:focus,
+body.dark #showresize:hover, body.dark #showresize:focus {
 	border-color: #f8f8f8 !important;
 }
 #fontsizer {
@@ -70,6 +79,46 @@ body.dark #showzoom:hover, body.dark #showzoom:focus {
 #fontsize:out-of-range { 
 	background-color: rgba(255, 0, 0, 0.25); 
 	border: 2px solid red; 
+}
+#toggler {
+	padding: 0;
+	cursor: pointer;
+	position: absolute;
+	top: 0;
+	right: 0;
+	z-index: 200;
+	color: rgba(128, 128, 128, 0.5);
+	display: none;
+}
+#toggleclosed, #toggleopen {
+	padding: 0 2px 2px 4px;
+}
+#toggleclosed:hover {
+	color: red;
+}
+#toggleopen:hover {
+	color: green;
+}
+header[collapse="true"] #dialogtitle {
+	display: none;
+}
+header[collapse="true"] #toggler {
+	display: block;
+}
+header[collapse="true"] #toggleclosed {
+	display: none;
+}
+header[collapse="true"] + main {
+	margin-top: 1px;
+}
+header[collapse="false"] #toggler {
+	display: block;
+}
+header[collapse="false"] #toggleopen {
+	display: none;
+}
+header[collapse="false"] #controls {
+	right: 8px;
 }
 ul {
 	list-style-type: none;
@@ -82,7 +131,7 @@ li {
 	display: inline-block;
 	width: 100%;
 	margin: 0;
-	padding: 4px 0 2px;
+	padding: 4px 0 2px 8px;
 	border-top: 1px solid #eee;
 	position: relative;
 	white-space: nowrap;
@@ -260,4 +309,25 @@ li:not([stt]) span.stt, ul:not(.popup) span.stt {
 #btnclose {
 	position: absolute;
 	right: 0;
+}
+#resizer {
+	display: none;
+	position: fixed;
+	left: 0;
+	top: 0;
+	padding: 0 8px;
+	width: 100%;
+	background: #ddd;
+}
+body.dark #resizer {
+	background: #333;
+}
+#resizer p {
+	text-align: right;
+}
+#resizer input {
+	width: 50px;
+	transform: scale(1.5) translateY(-1px);
+	margin: 0 15px;
+	padding: 0;
 }
