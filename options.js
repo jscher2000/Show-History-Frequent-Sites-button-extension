@@ -10,6 +10,7 @@
   version 1.0 - Font-size control, option to use an HTML link to leverage native keyboard navigation, right-click, etc.
   version 1.1 - Option to show "blocked" URLs dismissed from the new tab page, option for header open/close button
   version 1.2 - Popup resizer, style tweaks
+  version 1.3 - Color tweaking options, middle-click bug fix
 */
 
 /*** Initialize Options Page ***/
@@ -25,6 +26,8 @@ var oPrefs = {
 	searchShortcuts: false,		// include search shortcuts from the new tab page?
 	oneperdomain: false,		// only show one URL for each domain
 	darktheme: false,			// light text/dark background
+	lightthemetweaks: {},		// custom colors: {textcolor: "#222426", backcolor: "#fff"}
+	darkthemetweaks: {},		// custom colors: {textcolor: "#f8f8f8", backcolor: "#111"}
 	newtabpage: false,			// switch from frecent sites to new tab page Top Sites
 	groupbyhost: false,			// group list by hostname
 	groupclosed: true,			// group is initially collapsed
@@ -75,6 +78,15 @@ browser.storage.local.get("prefs").then((results) => {
 			document.forms[0].elements['switchtab'].setAttribute('perm', 'have-tabs');
 		}
 	});
+	// Set the text inputs
+	if (JSON.stringify(oPrefs.lightthemetweaks) !== '{}'){
+		document.querySelector('input[name="lightcustom"]').value = JSON.stringify(oPrefs.lightthemetweaks);
+		document.querySelector('input[name="lightcustom"]').placeholder = JSON.stringify(oPrefs.lightthemetweaks);
+	}
+	if (JSON.stringify(oPrefs.darkthemetweaks) !== '{}'){
+		document.querySelector('input[name="darkcustom"]').value = JSON.stringify(oPrefs.darkthemetweaks);
+		document.querySelector('input[name="darkcustom"]').placeholder = JSON.stringify(oPrefs.darkthemetweaks);
+	}
 }).catch((err) => {
 	document.getElementById('oops').textContent = 'Error retrieving "prefs" from storage or setting up form: ' + err.message;
 });
@@ -103,6 +115,41 @@ function updatePrefs(evt){
 		alert('The number of items must be between 1 and 100. Not saving ' + listmax + '; keeping ' + oPrefs.listmax + '.');
 		document.querySelector('input[name="listmax"]').value = oPrefs.listmax;
 	}
+	// Update theme color tweaks
+	var lightval = document.querySelector('input[name="lightcustom"]').value.trim();
+	if (lightval.length > 0){
+		try {
+			var lightjson = JSON.parse(lightval);
+			if (JSON.stringify(lightjson) != JSON.stringify(JSON.parse(document.querySelector('input[name="lightcustom"]').getAttribute('placeholder')))){
+				oPrefs.lightthemetweaks = lightjson;
+			} else if (JSON.stringify(lightjson) == JSON.stringify(JSON.parse(document.querySelector('input[name="lightcustom"]').getAttribute('defaultval')))){
+				oPrefs.lightthemetweaks = {};
+			}
+			document.querySelector('input[name="lightcustom"]').style.borderColor = '';
+		} catch(err) { // not valid JSON
+			console.log(err);
+			document.querySelector('input[name="lightcustom"]').style.borderColor = 'red';
+		}
+	} else {
+		oPrefs.lightthemetweaks = {};
+	}
+	var darkval = document.querySelector('input[name="darkcustom"]').value.trim();
+	if (darkval.length > 0){
+		try {
+			var darkjson = JSON.parse(darkval);
+			if (JSON.stringify(darkjson) != JSON.stringify(JSON.parse(document.querySelector('input[name="darkcustom"]').getAttribute('placeholder')))){
+				oPrefs.darkthemetweaks = darkjson;
+			} else if (JSON.stringify(darkjson) == JSON.stringify(JSON.parse(document.querySelector('input[name="darkcustom"]').getAttribute('defaultval')))){
+				oPrefs.darkthemetweaks = {};
+			}
+			document.querySelector('input[name="darkcustom"]').style.borderColor = '';
+		} catch(err) { // not valid JSON
+			console.log(err);
+			document.querySelector('input[name="darkcustom"]').style.borderColor = 'red';
+		}
+	} else {
+		oPrefs.darkthemetweaks = {};
+	}
 	// Update storage
 	browser.storage.local.set(
 		{prefs: oPrefs}
@@ -119,7 +166,7 @@ function updatePrefs(evt){
 	});
 }
 
-var chgCount = 0, numChg = 0;
+var chgCount = 0, numChg = 0, lightChg = 0, darkChg = 0;
 function lightSaveBtn(evt){
 	if (evt.target.nodeName != 'INPUT') return;
 	switch (evt.target.type){
@@ -141,10 +188,21 @@ function lightSaveBtn(evt){
 				evt.target.labels[0].style.backgroundColor = '';
 			}
 			break;
+		case 'text':
+			if (evt.target.value !== evt.target.getAttribute('placeholder')){
+				if (evt.target.name == 'lightcustom') lightChg = 1;
+				if (evt.target.name == 'darkcustom') darkChg = 1;
+				evt.target.labels[0].style.backgroundColor = '#ff0';
+			} else {
+				if (evt.target.name == 'lightcustom') lightChg = 0;
+				if (evt.target.name == 'darkcustom') darkChg = 0;
+				evt.target.labels[0].style.backgroundColor = '';
+			}
+			break;
 		default:
 			// none of these 
 	}
-	if ((chgCount + numChg) > 0) document.getElementById('btnsave').style.backgroundColor = '#ff0';
+	if ((chgCount + numChg + lightChg + darkChg) > 0) document.getElementById('btnsave').style.backgroundColor = '#ff0';
 	else document.getElementById('btnsave').style.backgroundColor = '';
 }
 
@@ -222,3 +280,12 @@ document.getElementById('resetSize').addEventListener('click', function(evt){
 	oPrefs.bodyheight = 350;
 	updatePrefs(evt);
 }, false);
+document.getElementById('btnThemeTweaks').addEventListener('click', function(evt){
+	if (document.getElementById('themetweaks').style.display == 'inline'){
+		document.getElementById('themetweaks').style.display = '';
+	} else {
+		document.getElementById('themetweaks').style.display = 'inline';
+	}
+}, false);
+document.forms[0].elements['lightcustom'].addEventListener('input', lightSaveBtn, false);
+document.forms[0].elements['darkcustom'].addEventListener('input', lightSaveBtn, false);

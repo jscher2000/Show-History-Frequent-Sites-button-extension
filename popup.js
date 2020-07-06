@@ -10,6 +10,7 @@
   version 1.0 - Font-size control, option to use an HTML link to leverage native keyboard navigation, right-click, etc.
   version 1.1 - Option to show "blocked" URLs dismissed from the new tab page, option for header open/close button
   version 1.2 - Popup resizer, style tweaks
+  version 1.3 - Color tweaking options, middle-click bug fix
 */
 
 /*** Initialize Popup Page ***/
@@ -25,6 +26,8 @@ var oPrefs = {
 	searchShortcuts: false,		// include search shortcuts from the new tab page?
 	oneperdomain: false,		// only show one URL for each domain
 	darktheme: false,			// light text/dark background
+	lightthemetweaks: {},		// custom colors: {textcolor: "#222426", backcolor: "#fff"}
+	darkthemetweaks: {},		// custom colors: {textcolor: "#f8f8f8", backcolor: "#111"}
 	newtabpage: false,			// switch from frecent sites to new tab page Top Sites
 	groupbyhost: false,			// group list by hostname
 	groupclosed: true,			// group is initially collapsed
@@ -60,8 +63,19 @@ if (typeof browser != 'undefined'){ // live Firefox extension
 		document.body.style.setProperty('--body-height', oPrefs.bodyheight + 'px', 'important');
 		document.getElementById('popwidth').value = oPrefs.bodywidth;
 		document.getElementById('popheight').value = oPrefs.bodyheight;
-		// Set dark theme
-		if (oPrefs.darktheme) document.body.className = 'dark';
+		// Set dark theme and apply color tweaks
+		if (oPrefs.darktheme){
+			document.body.className = 'dark';
+			if (JSON.stringify(oPrefs.darkthemetweaks) != '{}'){
+				if (oPrefs.darkthemetweaks.hasOwnProperty('textcolor')) document.body.style.setProperty('--body-text-color', oPrefs.darkthemetweaks.textcolor, 'important');
+				if (oPrefs.darkthemetweaks.hasOwnProperty('backcolor')) document.body.style.setProperty('--body-back-color', oPrefs.darkthemetweaks.backcolor, 'important');
+			}
+		} else {
+			if (JSON.stringify(oPrefs.lightthemetweaks) != '{}'){
+				if (oPrefs.lightthemetweaks.hasOwnProperty('textcolor')) document.body.style.setProperty('--body-text-color', oPrefs.lightthemetweaks.textcolor, 'important');
+				if (oPrefs.lightthemetweaks.hasOwnProperty('backcolor')) document.body.style.setProperty('--body-back-color', oPrefs.lightthemetweaks.backcolor, 'important');
+			}
+		}
 		// Set font size
 		document.body.style.setProperty('--body-size', oPrefs.bodyfontsize + 'px', 'important');
 		document.getElementById('fontsize').value = oPrefs.bodyfontsize;
@@ -313,6 +327,7 @@ function openFrecent(evt){
 		} else if ((oPrefs.opennewtab === true && !CtrlCommand && evt.button != 1) || 
 					(oPrefs.opennewtab === false && (CtrlCommand || evt.button == 1))){ // Open new tab
 			if (typeof browser != 'undefined'){
+				if (evt.button == 1 && tgt.nodeName == 'A') return; // use native middle-click handling v1.3
 				if (tgt.nodeName == 'A') evt.preventDefault(); // don't navigate the link!
 				browser.tabs.create({
 					active: oPrefs.newtabactive,
