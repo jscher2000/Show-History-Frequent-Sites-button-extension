@@ -1,4 +1,4 @@
-/* Show History Frequent Sites Button 1.3 */
+/* Show History Frequent Sites Button 1.4 */
 body {
 	--body-text-color: #222426;
 	color: var(--body-text-color);
@@ -164,10 +164,10 @@ ul:not(.twoline) .row2::before {
 }
 .row2 > a {
 	text-decoration: none;
-	color: rgb(66, 143, 219);
+	color: var(--body-url-color, #428fdb);
 }
 body.dark .row2 > a {
-	color: rgb(69, 161, 255);
+	color: var(--body-url-color, #45a1ff);
 }
 ul.twoline .row2 {
 	display: block;
@@ -184,10 +184,10 @@ li > a > .row1 {
 	color: var(--body-text-color);
 }
 li > a > .row2 {
-	color: rgb(66, 143, 219);
+	color: var(--body-url-color, #428fdb);
 }
 body.dark li > a > .row2 {
-	color: rgb(69, 161, 255);
+	color: var(--body-url-color, #45a1ff);
 }
 /* Rules for group controls */
 .expander {

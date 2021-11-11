@@ -1,5 +1,5 @@
 /* 
-  "Show History Frequent Sites Button" Copyright 2020. Jefferson "jscher2000" Scher. License: MPL-2.0.
+  "Show History Frequent Sites Button" Copyright 2021. Jefferson "jscher2000" Scher. License: MPL-2.0.
   version 0.5 - initial concept
   version 0.6 - enabled middle-click; dark theme option; option to show more sites by limiting URLs per site to one
   version 0.7 - New Tab Page Top Sites option, group-by-host option
@@ -11,6 +11,7 @@
   version 1.1 - Option to show "blocked" URLs dismissed from the new tab page, option for header open/close button
   version 1.2 - Popup resizer, style tweaks
   version 1.3 - Color tweaking options, middle-click bug fix
+  version 1.4 - Optional page action button, more color tweaking options, "entire row URL" bug fix
 */
 
 /*** Initialize Options Page ***/
@@ -26,8 +27,8 @@ var oPrefs = {
 	searchShortcuts: false,		// include search shortcuts from the new tab page?
 	oneperdomain: false,		// only show one URL for each domain
 	darktheme: false,			// light text/dark background
-	lightthemetweaks: {},		// custom colors: {textcolor: "#222426", backcolor: "#fff"}
-	darkthemetweaks: {},		// custom colors: {textcolor: "#f8f8f8", backcolor: "#111"}
+	lightthemetweaks: {},		// custom colors: {textcolor: "#222426", backcolor: "#fff", "linkcolor": "#428fdb"}
+	darkthemetweaks: {},		// custom colors: {textcolor: "#f8f8f8", backcolor: "#111", "linkcolor": "#45a1ff"}
 	newtabpage: false,			// switch from frecent sites to new tab page Top Sites
 	groupbyhost: false,			// group list by hostname
 	groupclosed: true,			// group is initially collapsed
@@ -42,7 +43,8 @@ var oPrefs = {
 	collapseHeader: false,		// hide header by default
 	bodywidth: 750,				// numeric pixel min-width for popup
 	bodyheight: 350,			// numeric pixel min-height for popup
-	showResizer: true			// show width/height button in popup
+	showResizer: true,			// show width/height button in popup
+	pageaction: false			// Button in the address bar
 }
 
 // Update oPrefs from storage and update form values
@@ -161,6 +163,10 @@ function updatePrefs(evt){
 		}
 		evt.target.style.backgroundColor = '';
 		evt.target.blur();
+		// Message the background script (v1.4)
+		browser.runtime.sendMessage({
+			update: oPrefs
+		});
 	}).catch((err) => {
 		document.getElementById('oops').textContent = 'Error on browser.storage.local.set(): ' + err.message;
 	});

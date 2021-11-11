@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="utf-8">
-<title>Options for Show History Frequent Sites Button 1.3</title>
+<title>Options for Show History Frequent Sites Button 1.4</title>
 <style>
 body {font-size: 16px;}
 h1 {font-size: 1.2em;}
@@ -25,7 +25,7 @@ h1 {font-size: 1.2em;}
 	<label><input type="checkbox" name="groupbyhost" value="groupbyhost">Group URLs by site host name</label> <label><input type="checkbox" name="groupclosed" value="groupclosed">Collapse groups by default</label><br>
 	<label><input type="checkbox" name="twoline" value="twoline">Show URL on a second line below the title</label><br>
 	<label><input type="checkbox" name="switchtab" value="switchtab">Show switch-to-tab button (requires tabs permission)</label> <button id="revoketabs" type="button" chks="switchtab" perm="tabs">Revoke tabs permission</button><br>
-	<label><input type="checkbox" name="fullrowlinked" value="fullrowlinked">Entire row (icon, title, URL, blank space) is a real link</label>
+	<label><input type="checkbox" name="fullrowlinked" value="fullrowlinked">Entire row (icon, title, URL, blank space) is a real link (opens new tab)</label>
 </p>
 <p class="chk"><strong>Open in new tab options</strong>:<br>
 	<label><input type="checkbox" name="opennewtab" value="opennewtab">Open URL in a new tab (otherwise, use Ctrl+click (on Mac, Command+click) or middle-click to open URL in a new tab)</label><br>
@@ -38,14 +38,18 @@ h1 {font-size: 1.2em;}
 	<label><input type="checkbox" name="darktheme" value="darktheme">Use a dark theme (light text on dark background)</label> <button id="btnThemeTweaks" type="button">Advanced Color Tweaking</button><span id="themetweaks"><br>
 	<em style="margin-left: 21px;">Carefully edit the second and fourth quoted values (<a href="https://developer.mozilla.org/docs/Web/CSS/color_value" 
 	target="_blank">MDN</a>) (clear for defaults):</em><br>
-	<label style="margin-left: 21px;">Light: <input type="text" name="lightcustom" placeholder='{ "textcolor": "#222426", "backcolor": "#fff" }' 
-	value='{ "textcolor": "#222426", "backcolor": "#fff" }' defaultval='{ "textcolor": "#222426", "backcolor": "#fff" }' style="width: 400px;"></label><br>
-	<label style="margin-left: 21px;">Dark: <input type="text" name="darkcustom" placeholder='{ "textcolor": "#f8f8f8", "backcolor": "#111" }' 
-	value='{ "textcolor": "#f8f8f8", "backcolor": "#111" }' defaultval='{ "textcolor": "#f8f8f8", "backcolor": "#111" }' style="width: 400px;"></label></span><br>
+	<label style="margin-left: 21px;">Light: <input type="text" name="lightcustom" placeholder='{ "textcolor": "#222426", "backcolor": "#fff", "linkcolor": "#428fdb" }' 
+	value='{ "textcolor": "#222426", "backcolor": "#fff", "linkcolor": "#428fdb" }' defaultval='{ "textcolor": "#222426", "backcolor": "#fff", "linkcolor": "#428fdb" }' style="width: 450px;"></label><br>
+	<label style="margin-left: 21px;">Dark: <input type="text" name="darkcustom" placeholder='{ "textcolor": "#f8f8f8", "backcolor": "#111", "linkcolor": "#45a1ff" }' 
+	value='{ "textcolor": "#f8f8f8", "backcolor": "#111", "linkcolor": "#45a1ff" }' defaultval='{ "textcolor": "#f8f8f8", "backcolor": "#111", "linkcolor": "#45a1ff" }' style="width: 450px;"></label></span><br>
 	<label><input type="checkbox" name="filterbar" value="filterbar">Show filter bar</label> <label><input type="checkbox" name="caseinsens" value="caseinsens">Case insensitive</label><br>
 	<label><input type="checkbox" name="showfontbutton" value="showfontbutton">Show font sizer (&#8314;&#8725;&#8331;) button</label><br>
 	<label><input type="checkbox" name="showResizer" value="showResizer">Show popup resizer (↔) button</label> (800x600 max) <button type="button" id="resetSize">Reset drop-down size &amp; Save Changes</button><br>
 	<label><input type="checkbox" name="showtoggler" value="showtoggler">Show button to open ▼ / close ▲ the header</label> <label><input type="checkbox" name="collapseHeader" value="collapseHeader" truesame="showtoggler">Hide the header</label>
+</p>
+<p class="chk"><strong>Optional address bar (page action) button:</strong><br>
+	<label><input type="checkbox" name="pageaction"> Show button inside address bar</label><br>
+	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<em>Changes will be reflected on the next page (re)load in the tab</em>
 </p>
 <p id="oops"></p>
 </form>
